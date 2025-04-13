@@ -5,8 +5,6 @@ import {
   useConnection,
   Node,
 } from "@xyflow/react";
-import "./Graph.css";
-import "@xyflow/react/dist/style.css";
 import { memo } from "react";
 
 const predCol = { student: "blue", teacher: "red" };
