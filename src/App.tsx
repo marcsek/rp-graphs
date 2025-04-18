@@ -5,9 +5,7 @@ import Graphs from "./Graph";
 function App() {
   return (
     <>
-      <ReactFlowProvider>
-        <Graphs />
-      </ReactFlowProvider>
+      <Graphs />
     </>
   );
 }

@@ -5,6 +5,8 @@ import {
   addEdge,
   Background,
   ConnectionMode,
+  DefaultEdgeOptions,
+  Edge,
   MarkerType,
   ReactFlow,
   useEdgesState,
@@ -17,6 +19,7 @@ import CustomNode from "./CustomNode";
 import CustomConnectionLine from "./CustomConnectionLine";
 import SelfConnectingEdge from "./SelfConnectingEdge";
 
+const predCol = { student: "blue", teacher: "red" };
 const preds = [
   { name: "student", active: false, focused: false },
   { name: "teacher", active: false, focused: false },
@@ -31,6 +34,7 @@ const initialNodes = [
       constant: "Bob",
       predicate: ["student", "teacher"],
       activePreds: [],
+      focusedPreds: [],
     },
     activePreds: [],
     type: "custom",
@@ -43,16 +47,19 @@ const initialNodes = [
       constant: "Alice",
       predicate: ["student"],
       activePreds: [],
+      focusedPreds: [],
     },
     type: "custom",
   },
 ];
 
-const initialEdges = [{ id: "e1-2", source: "1", target: "2" }];
+const initialEdges: Edge<DefaultEdgeOptions>[] = [
+  { id: "e1-2", source: "1", target: "2" },
+];
 
 const connectionLineStyle = {
-  stroke: "#b1b1b7",
-  zIndex: 0,
+  stroke: "#22C55E99",
+  strokeWidth: 2,
 };
 
 const nodeTypes = {
@@ -64,8 +71,11 @@ const edgeTypes = {
   selfConnecting: SelfConnectingEdge,
 };
 
-const defaultEdgeOptions = {
+const defaultEdgeOptions: DefaultEdgeOptions = {
   type: "floating",
+  style: {
+    stroke: "#b1b1b7",
+  },
   markerEnd: {
     type: MarkerType.ArrowClosed,
     color: "#b1b1b7",
@@ -76,7 +86,9 @@ function BasicGraph() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [activePreds, setActivePreds] = useState<typeof preds>(preds);
-  const { screenToFlowPosition } = useReactFlow();
+  const [focusedPreds, setFocusedPreds] = useState<typeof preds>(preds);
+  const { getNode, updateEdge, getNodeConnections, screenToFlowPosition } =
+    useReactFlow();
 
   useEffect(() => {
     setNodes((prev) =>
@@ -85,8 +97,63 @@ function BasicGraph() {
         data: { ...e.data, activePreds: activePreds },
       })),
     );
-    console.log(nodes);
   }, [activePreds]);
+
+  useEffect(() => {
+    const focusedNodes = nodes.filter((n) =>
+      n.data.focusedPreds.some((e) => e.focused),
+    );
+
+    const shouldFocus: { id: string; color: string }[] = [];
+    focusedNodes.forEach((n) => {
+      const connections = getNodeConnections({ nodeId: n.id });
+      connections.forEach((c) => {
+        const sourceNode = getNode(c.source);
+        const targetNode = getNode(c.target);
+        const focusedS = sourceNode.data.focusedPreds as any;
+        const focusedSP = sourceNode.data.predicate as any;
+        const focusedT = targetNode.data.focusedPreds as any;
+        const focusedTP = targetNode.data.predicate as any;
+
+        const sourceFocused = focusedS.some(
+          (e: any) => focusedSP.includes(e.name) && e.focused,
+        );
+        const targetFocused = focusedT.some(
+          (e: any) => focusedTP.includes(e.name) && e.focused,
+        );
+
+        if (sourceFocused && targetFocused)
+          shouldFocus.push({
+            id: c.edgeId,
+            color: predCol[focusedPreds[0].name],
+          });
+      });
+    });
+
+    console.log(shouldFocus, edges);
+    setEdges((prev) =>
+      prev.map((e) => {
+        const found = shouldFocus.find((f) => f.id === e.id);
+        const stroke = found ? found.color : "#b1b1b7";
+
+        return {
+          ...e,
+          className: found ? "animated" : "",
+          style: { ...e.style, stroke },
+          markerEnd: { type: MarkerType.ArrowClosed, color: stroke },
+        };
+      }),
+    );
+  }, [focusedPreds, nodes, updateEdge, getNodeConnections]);
+
+  useEffect(() => {
+    setNodes((prev) =>
+      prev.map((e) => ({
+        ...e,
+        data: { ...e.data, focusedPreds: focusedPreds },
+      })),
+    );
+  }, [focusedPreds]);
 
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge(params, eds)),
@@ -104,6 +171,7 @@ function BasicGraph() {
           constant: lastNodeId.toString(),
           predicate: [],
           activePreds: activePreds,
+          focusedPreds: focusedPreds,
         },
         type: "custom",
       }),
@@ -127,12 +195,29 @@ function BasicGraph() {
         connectionLineComponent={CustomConnectionLine}
         connectionLineStyle={connectionLineStyle}
         connectionMode={ConnectionMode.Loose}
+        connectionRadius={55}
         fitView
       >
-        <Background />
+        <Background id="2" />
       </ReactFlow>
       {activePreds.map((p) => (
-        <label key={p.name}>
+        <label
+          key={p.name}
+          onMouseEnter={() => {
+            setFocusedPreds((prev) =>
+              prev.map((item) =>
+                item.name === p.name ? { ...item, focused: true } : item,
+              ),
+            );
+          }}
+          onMouseLeave={() => {
+            setFocusedPreds((prev) =>
+              prev.map((item) =>
+                item.name === p.name ? { ...item, focused: false } : item,
+              ),
+            );
+          }}
+        >
           <input
             type="checkbox"
             checked={p.active}

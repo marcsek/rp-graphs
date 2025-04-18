@@ -16,7 +16,12 @@ function CustomConnectionLine({
 
   return (
     <g>
-      <path style={connectionLineStyle} fill="none" d={edgePath} />
+      <path
+        className="animated"
+        style={connectionLineStyle}
+        fill="none"
+        d={edgePath}
+      />
     </g>
   );
 }

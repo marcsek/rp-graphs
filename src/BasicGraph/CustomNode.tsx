@@ -4,6 +4,7 @@ import {
   Position,
   useConnection,
   Node,
+  useReactFlow,
 } from "@xyflow/react";
 import { memo } from "react";
 
@@ -18,19 +19,41 @@ const CustomNode = memo(
       constant: string;
       predicate: string[];
       activePreds: Record<string, any>[];
+      focusedPreds: Record<string, any>[];
     }>
   >) => {
     const connection = useConnection();
-    //console.log(data.activePreds);
+    const { getNodeConnections } = useReactFlow();
+    console.log("conns", id, getNodeConnections({ nodeId: id }));
     const myActivePreds = data.activePreds.filter(
       (e) => data.predicate.includes(e.name) && e.active,
     );
 
+    let myFocus = "default";
+    const myFocusedPreds = data.focusedPreds.filter(
+      (e) => data.predicate.includes(e.name) && e.focused,
+    );
+
+    const focusedPreds = data.focusedPreds.filter((e) => e.focused);
+    if (focusedPreds.length != 0) myFocus = "disabled";
+    if (focusedPreds.length != 0 && myFocusedPreds.length != 0)
+      myFocus = "focused";
+
     //console.log(connection);
     const isTarget = connection.inProgress;
+    console.log(myFocus);
 
     return (
-      <div className="customNode" onDoubleClick={() => console.log("halooo")}>
+      <div
+        className="customNode"
+        style={{
+          border: "solid",
+          borderWidth: myFocus === "focused" ? "2px" : "0px",
+          borderColor:
+            myFocus === "focused" ? predCol[myFocusedPreds[0].name] : "",
+          opacity: myFocus === "disabled" ? "30%" : "100%",
+        }}
+      >
         <div className="customNodeBody">
           {/* If handles are conditionally rendered and not present initially, you need to update the node internals https://reactflow.dev/docs/api/hooks/use-update-node-internals/ */}
           {/* In this case we don't need to use useUpdateNodeInternals, since !isConnecting is true at the beginning and all handles are rendered initially. */}
