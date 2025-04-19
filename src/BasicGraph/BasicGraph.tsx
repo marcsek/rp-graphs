@@ -18,11 +18,29 @@ import FloatingEdge from "./FloatingEdge";
 import CustomNode from "./CustomNode";
 import CustomConnectionLine from "./CustomConnectionLine";
 import SelfConnectingEdge from "./SelfConnectingEdge";
+import AddNodeButton from "./AddNodeButton";
 
-const predCol = { student: "blue", teacher: "red" };
+const rndPred = (preds: any) => {
+  // Step 1: Get all keys
+  const keys = Object.keys(preds);
+
+  // Step 2: Choose a random number of keys to select (can be 0)
+  const count = Math.floor(Math.random() * (keys.length + 1)); // 0 to keys.length
+
+  // Step 3: Shuffle and take `count` keys
+  const shuffled = keys.sort(() => 0.5 - Math.random());
+  const selectedKeys = shuffled.slice(0, count);
+
+  // Step 4: Ensure they're strings (already are, but for clarity)
+  return selectedKeys.map(String);
+};
+
+const domain = ["4", "5", "6", "8"];
+const predCol = { student: "#FFAB00", teacher: "#22C55E", janitor: "#00B8D9" };
 const preds = [
   { name: "student", active: false, focused: false },
   { name: "teacher", active: false, focused: false },
+  { name: "janitor", active: false, focused: false },
 ];
 
 const initialNodes = [
@@ -122,10 +140,15 @@ function BasicGraph() {
           (e: any) => focusedTP.includes(e.name) && e.focused,
         );
 
-        if (sourceFocused && targetFocused)
+        let ttFocused = focusedPreds.find(
+          (p) =>
+            (sourceNode.data.predicate as any[]).includes(p.name) && p.focused,
+        );
+        console.log("TTFOCUSED", ttFocused);
+        if (sourceFocused && targetFocused && ttFocused)
           shouldFocus.push({
             id: c.edgeId,
-            color: predCol[focusedPreds[0].name],
+            color: predCol[ttFocused.name],
           });
       });
     });
@@ -134,6 +157,7 @@ function BasicGraph() {
     setEdges((prev) =>
       prev.map((e) => {
         const found = shouldFocus.find((f) => f.id === e.id);
+        console.log("SHOULD FOCUS", shouldFocus);
         const stroke = found ? found.color : "#b1b1b7";
 
         return {
@@ -170,6 +194,24 @@ function BasicGraph() {
           label: lastNodeId.toString(),
           constant: lastNodeId.toString(),
           predicate: [],
+          activePreds: activePreds,
+          focusedPreds: focusedPreds,
+        },
+        type: "custom",
+      }),
+    );
+  };
+
+  const addNodeWithId = (id: string, x: number, y: number) => {
+    console.log("ADDING");
+    setNodes((nds) =>
+      nds.concat({
+        id: id,
+        position: { x, y },
+        data: {
+          label: id,
+          constant: id,
+          predicate: rndPred(predCol),
           activePreds: activePreds,
           focusedPreds: focusedPreds,
         },
@@ -234,6 +276,10 @@ function BasicGraph() {
           {p.name}
         </label>
       ))}
+      <AddNodeButton
+        elements={domain}
+        onAdd={(id) => addNodeWithId(id, 0, 0)}
+      />
     </div>
   );
 }

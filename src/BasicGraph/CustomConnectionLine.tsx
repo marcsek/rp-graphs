@@ -1,4 +1,8 @@
-import { ConnectionLineComponentProps, getStraightPath } from "@xyflow/react";
+import {
+  ConnectionLineComponentProps,
+  getStraightPath,
+  useConnection,
+} from "@xyflow/react";
 
 function CustomConnectionLine({
   fromX,
@@ -13,12 +17,16 @@ function CustomConnectionLine({
     targetX: toX,
     targetY: toY,
   });
+  const connection = useConnection();
 
   return (
     <g>
       <path
         className="animated"
-        style={connectionLineStyle}
+        style={{
+          ...connectionLineStyle,
+          stroke: connection.isValid ? connectionLineStyle.stroke : "red",
+        }}
         fill="none"
         d={edgePath}
       />

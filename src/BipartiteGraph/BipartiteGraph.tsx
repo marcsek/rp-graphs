@@ -9,6 +9,7 @@ import {
   BackgroundVariant,
   NodeChange,
   NodePositionChange,
+  useReactFlow,
 } from "@xyflow/react";
 import "../BasicGraph/BasicGraph.css";
 
@@ -70,6 +71,7 @@ let idCounter = 10;
 function BipartiteGraph() {
   const [nodes, setNodes] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const { fitView } = useReactFlow();
 
   useEffect(() => {
     const onAddNode = (adderId: string, type: "domain" | "range") => {
@@ -109,6 +111,7 @@ function BipartiteGraph() {
           return e;
         });
       });
+      fitView({ duration: 500 });
     };
 
     setNodes((prev) =>
