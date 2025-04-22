@@ -1,4 +1,5 @@
 import {
+  BaseEdge,
   EdgeProps,
   getStraightPath,
   InternalNode,
@@ -13,7 +14,6 @@ function FloatingEdge(props: EdgeProps) {
   const targetNode = useInternalNode(target);
 
   if (!sourceNode || !targetNode) return null;
-
   if (sourceNode === targetNode) return <SelfConnectingEdge {...props} />;
 
   const { sx, sy, tx, ty } = getEdgeParams(sourceNode, targetNode);
@@ -25,13 +25,15 @@ function FloatingEdge(props: EdgeProps) {
   });
 
   return (
-    <path
-      id={id}
-      className="react-flow__edge-path"
-      d={edgePath}
-      markerEnd={markerEnd}
-      style={style}
-    />
+    <>
+      <BaseEdge
+        id={id}
+        className="react-flow__edge-path"
+        path={edgePath}
+        markerEnd={markerEnd}
+        style={style}
+      />
+    </>
   );
 }
 

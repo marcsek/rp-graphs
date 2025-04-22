@@ -29,6 +29,45 @@ export function isSubset(setA: string[], setB: string[]) {
   return setA.every((e) => setB.includes(e));
 }
 
+export function isPoset(relations) {
+  // 1) Gather all elements
+  const elems = new Set();
+  for (const [a, b] of relations) {
+    elems.add(a);
+    elems.add(b);
+  }
+
+  // 2) Build successor map
+  const succ = new Map();
+  for (const [a, b] of relations) {
+    if (!succ.has(a)) succ.set(a, new Set());
+    succ.get(a).add(b);
+  }
+
+  // 3) Reflexivity: ∀x, (x, x) ∈ R
+  for (const x of elems) {
+    if (!succ.get(x)?.has(x)) return false;
+  }
+
+  // 4) Antisymmetry: ∀x≠y, if xRy and yRx ⇒ x === y
+  for (const [a, b] of relations) {
+    if (a !== b && succ.get(b)?.has(a)) {
+      return false;
+    }
+  }
+
+  // 5) Transitivity: ∀xRy ∧ yRz ⇒ xRz
+  for (const [a, b] of relations) {
+    for (const c of succ.get(b) || []) {
+      if (!succ.get(a)?.has(c)) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
 export function hasseEdges(relations) {
   // Build a lookup Map so we can do constant-time checks for a→b
   const succ = new Map();
@@ -256,4 +295,52 @@ export function isValidHasseWithEdge(hasseEdges, [u_new, v_new]) {
   }
 
   return true;
+}
+
+/**
+ * Given a Hasse diagram (array of minimal edges [u,v]),
+ * reconstruct the full poset relation by adding
+ *  • reflexive loops (x,x) for every element x
+ *  • all implied pairs via transitive closure
+ *
+ * @param {Array<[any, any]>} hasseEdges
+ * @returns {Array<[any, any]>} the full relation R
+ */
+export function hasseToRelation(hasseEdges) {
+  // 1) collect all nodes and build adjacency map
+  const nodes = new Set<any>();
+  const succ = new Map<any, Set<any>>();
+  for (const [u, v] of hasseEdges) {
+    nodes.add(u);
+    nodes.add(v);
+    if (!succ.has(u)) succ.set(u, new Set());
+    succ.get(u)!.add(v);
+  }
+  // make sure every node appears in succ, even if with empty set
+  for (const x of nodes) {
+    if (!succ.has(x)) succ.set(x, new Set());
+  }
+
+  const relation: Array<[any, any]> = [];
+
+  // 2) for each node, do a DFS to collect all reachable targets
+  for (const start of nodes) {
+    // reflexive
+    relation.push([start, start]);
+
+    const seen = new Set<any>();
+    const stack = [start];
+    while (stack.length) {
+      const cur = stack.pop()!;
+      for (const nxt of succ.get(cur)!) {
+        if (!seen.has(nxt)) {
+          seen.add(nxt);
+          relation.push([start, nxt]);
+          stack.push(nxt);
+        }
+      }
+    }
+  }
+
+  return relation;
 }

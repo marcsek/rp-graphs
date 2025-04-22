@@ -1,0 +1,161 @@
+.topContainer {
+  font-family: "JetBrains Mono", monospace;
+}
+
+.explorerContainer {
+  display: flex;
+  border-radius: 0.5rem;
+  outline: 2px solid #bbbbbb55;
+  gap: 1rem;
+  padding: 1rem 0;
+  justify-content: center;
+  position: relative;
+}
+
+.explorerContainer > div:not(.divider) {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0rem 1.5rem;
+}
+
+.divider {
+  margin: 1rem 0;
+  padding: 0;
+  box-sizing: border-box;
+  width: 2px;
+  border-radius: 1rem;
+  border-radius: 1rem;
+  background-color: #bbbbbb55;
+}
+
+.languageForm {
+  max-width: 600px;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  flex-direction: column;
+  padding-top: 1rem;
+}
+
+.languageForm span {
+  font-size: 0.94rem;
+  text-align: left;
+}
+
+.structureContainer {
+  flex-grow: 2;
+}
+
+.structureForm {
+  padding: 1rem 0;
+  display: flex;
+  gap: 2rem;
+  width: 100%;
+  flex-direction: column;
+}
+
+.other {
+  display: flex;
+  gap: 2rem;
+  width: 100%;
+}
+
+.unary {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: 2rem;
+  row-gap: 1rem;
+  width: 100%;
+}
+
+.input {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  box-sizing: border-box;
+  gap: 0;
+}
+
+.input input {
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  font-size: 0.9rem;
+  font-family: "JetBrains Mono", monospace;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.input label {
+  font-size: 0.9rem;
+}
+
+.input input:focus {
+  outline: none;
+  border-color: #3b82f6; /* Tailwind's blue-500 */
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+.input.domain {
+  flex-grow: 1;
+}
+
+.input.constants {
+  flex-grow: 2;
+}
+
+.input.predicate {
+  flex-grow: 2;
+}
+
+.input.predicate label {
+  font-style: italic;
+  flex-grow: 2;
+}
+
+.explorerContainer button {
+  position: absolute;
+  bottom: 0;
+  right: 50%;
+  transform: translateY(50%) translateX(50%);
+
+  padding: 4px 8px;
+  background-color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  border: 2px solid #bbbbbb99;
+  border-radius: 1.5rem;
+  padding-top: 8px;
+}
+
+.explorerContainer > svg {
+  margin: 0.3rem;
+}
+
+.selectedStructContainer {
+  display: flex;
+  font-size: 1.4rem;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.selectedStructContainer .structName {
+  box-sizing: border-box;
+  cursor: pointer;
+  user-select: none;
+  line-height: 0.5;
+}
+
+.selectedStructContainer .structName:hover {
+  font-weight: bold;
+}
+
+.selectedStructContainer .selectedName {
+  font-weight: bold;
+  text-decoration: underline;
+  text-decoration-color: #22c55e;
+}

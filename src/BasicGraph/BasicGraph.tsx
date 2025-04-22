@@ -2,78 +2,29 @@ import "./BasicGraph.css";
 import "@xyflow/react/dist/style.css";
 
 import {
-  addEdge,
   Background,
   ConnectionMode,
   DefaultEdgeOptions,
-  Edge,
   MarkerType,
+  NodeChange,
   ReactFlow,
-  useEdgesState,
-  useNodesState,
-  useReactFlow,
 } from "@xyflow/react";
-import { useCallback, useEffect, useState } from "react";
 import FloatingEdge from "./FloatingEdge";
 import CustomNode from "./CustomNode";
 import CustomConnectionLine from "./CustomConnectionLine";
 import SelfConnectingEdge from "./SelfConnectingEdge";
 import AddNodeButton from "./AddNodeButton";
-
-const rndPred = (preds: any) => {
-  // Step 1: Get all keys
-  const keys = Object.keys(preds);
-
-  // Step 2: Choose a random number of keys to select (can be 0)
-  const count = Math.floor(Math.random() * (keys.length + 1)); // 0 to keys.length
-
-  // Step 3: Shuffle and take `count` keys
-  const shuffled = keys.sort(() => 0.5 - Math.random());
-  const selectedKeys = shuffled.slice(0, count);
-
-  // Step 4: Ensure they're strings (already are, but for clarity)
-  return selectedKeys.map(String);
-};
-
-const domain = ["4", "5", "6", "8"];
-const predCol = { student: "#FFAB00", teacher: "#22C55E", janitor: "#00B8D9" };
-const preds = [
-  { name: "student", active: false, focused: false },
-  { name: "teacher", active: false, focused: false },
-  { name: "janitor", active: false, focused: false },
-];
-
-const initialNodes = [
-  {
-    id: "1",
-    position: { x: 0, y: 0 },
-    data: {
-      label: "1",
-      constant: "Bob",
-      predicate: ["student", "teacher"],
-      activePreds: [],
-      focusedPreds: [],
-    },
-    activePreds: [],
-    type: "custom",
-  },
-  {
-    id: "2",
-    position: { x: 0, y: 100 },
-    data: {
-      label: "2",
-      constant: "Alice",
-      predicate: ["student"],
-      activePreds: [],
-      focusedPreds: [],
-    },
-    type: "custom",
-  },
-];
-
-const initialEdges: Edge<DefaultEdgeOptions>[] = [
-  { id: "e1-2", source: "1", target: "2" },
-];
+import { useAppDispatch, useAppSelector } from "../app/hooks";
+import {
+  makeConnection,
+  nodeAdded,
+  NodeType,
+  onNodesChange,
+  predFocused,
+  predUnfocused,
+  togglePredicate,
+  updateEdges,
+} from "./basicGraphSlice";
 
 const connectionLineStyle = {
   stroke: "#22C55E99",
@@ -101,123 +52,18 @@ const defaultEdgeOptions: DefaultEdgeOptions = {
 };
 
 function BasicGraph() {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const [activePreds, setActivePreds] = useState<typeof preds>(preds);
-  const [focusedPreds, setFocusedPreds] = useState<typeof preds>(preds);
-  const { getNode, updateEdge, getNodeConnections, screenToFlowPosition } =
-    useReactFlow();
-
-  useEffect(() => {
-    setNodes((prev) =>
-      prev.map((e) => ({
-        ...e,
-        data: { ...e.data, activePreds: activePreds },
-      })),
-    );
-  }, [activePreds]);
-
-  useEffect(() => {
-    const focusedNodes = nodes.filter((n) =>
-      n.data.focusedPreds.some((e) => e.focused),
-    );
-
-    const shouldFocus: { id: string; color: string }[] = [];
-    focusedNodes.forEach((n) => {
-      const connections = getNodeConnections({ nodeId: n.id });
-      connections.forEach((c) => {
-        const sourceNode = getNode(c.source);
-        const targetNode = getNode(c.target);
-        const focusedS = sourceNode.data.focusedPreds as any;
-        const focusedSP = sourceNode.data.predicate as any;
-        const focusedT = targetNode.data.focusedPreds as any;
-        const focusedTP = targetNode.data.predicate as any;
-
-        const sourceFocused = focusedS.some(
-          (e: any) => focusedSP.includes(e.name) && e.focused,
-        );
-        const targetFocused = focusedT.some(
-          (e: any) => focusedTP.includes(e.name) && e.focused,
-        );
-
-        let ttFocused = focusedPreds.find(
-          (p) =>
-            (sourceNode.data.predicate as any[]).includes(p.name) && p.focused,
-        );
-        console.log("TTFOCUSED", ttFocused);
-        if (sourceFocused && targetFocused && ttFocused)
-          shouldFocus.push({
-            id: c.edgeId,
-            color: predCol[ttFocused.name],
-          });
-      });
-    });
-
-    console.log(shouldFocus, edges);
-    setEdges((prev) =>
-      prev.map((e) => {
-        const found = shouldFocus.find((f) => f.id === e.id);
-        console.log("SHOULD FOCUS", shouldFocus);
-        const stroke = found ? found.color : "#b1b1b7";
-
-        return {
-          ...e,
-          className: found ? "animated" : "",
-          style: { ...e.style, stroke },
-          markerEnd: { type: MarkerType.ArrowClosed, color: stroke },
-        };
-      }),
-    );
-  }, [focusedPreds, nodes, updateEdge, getNodeConnections]);
-
-  useEffect(() => {
-    setNodes((prev) =>
-      prev.map((e) => ({
-        ...e,
-        data: { ...e.data, focusedPreds: focusedPreds },
-      })),
-    );
-  }, [focusedPreds]);
-
-  const onConnect = useCallback(
-    (params) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges],
+  const nodes = useAppSelector((state) => state.graph.nodes);
+  const edges = useAppSelector((state) => state.graph.edges);
+  const domain = useAppSelector((state) => state.explorer.domain);
+  const unaryPredicates = useAppSelector(
+    (state) => state.explorer.unaryPredicates,
   );
-
-  const addNode = (x: number, y: number) => {
-    let lastNodeId: number = parseInt(nodes[nodes.length - 1].id) + 1;
-    setNodes((nds) =>
-      nds.concat({
-        id: lastNodeId.toString(),
-        position: screenToFlowPosition({ x, y }),
-        data: {
-          label: lastNodeId.toString(),
-          constant: lastNodeId.toString(),
-          predicate: [],
-          activePreds: activePreds,
-          focusedPreds: focusedPreds,
-        },
-        type: "custom",
-      }),
-    );
-  };
-
+  const selectedPredicates = useAppSelector(
+    (state) => state.graph.selectedPreds,
+  );
+  const dispatch = useAppDispatch();
   const addNodeWithId = (id: string, x: number, y: number) => {
-    console.log("ADDING");
-    setNodes((nds) =>
-      nds.concat({
-        id: id,
-        position: { x, y },
-        data: {
-          label: id,
-          constant: id,
-          predicate: rndPred(predCol),
-          activePreds: activePreds,
-          focusedPreds: focusedPreds,
-        },
-        type: "custom",
-      }),
-    );
+    dispatch(nodeAdded({ id, x, y }));
   };
 
   return (
@@ -225,11 +71,12 @@ function BasicGraph() {
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
+        onNodesChange={(e) =>
+          dispatch(onNodesChange(e as NodeChange<NodeType>[]))
+        }
+        onEdgesChange={(e) => dispatch(updateEdges(e))}
         proOptions={{ hideAttribution: true }}
-        onConnect={onConnect}
-        onDoubleClick={(e) => addNode(e.clientX, e.clientY)}
+        onConnect={(e) => dispatch(makeConnection(e))}
         zoomOnDoubleClick={false}
         defaultEdgeOptions={defaultEdgeOptions}
         edgeTypes={edgeTypes}
@@ -242,36 +89,16 @@ function BasicGraph() {
       >
         <Background id="2" />
       </ReactFlow>
-      {activePreds.map((p) => (
+      {unaryPredicates.map((p) => (
         <label
           key={p.name}
-          onMouseEnter={() => {
-            setFocusedPreds((prev) =>
-              prev.map((item) =>
-                item.name === p.name ? { ...item, focused: true } : item,
-              ),
-            );
-          }}
-          onMouseLeave={() => {
-            setFocusedPreds((prev) =>
-              prev.map((item) =>
-                item.name === p.name ? { ...item, focused: false } : item,
-              ),
-            );
-          }}
+          onMouseEnter={() => dispatch(predFocused(p.name))}
+          onMouseLeave={() => dispatch(predUnfocused())}
         >
           <input
             type="checkbox"
-            checked={p.active}
-            onChange={(e) => {
-              setActivePreds((prev) =>
-                prev.map((item) =>
-                  item.name === p.name
-                    ? { ...item, active: !item.active }
-                    : item,
-                ),
-              );
-            }}
+            checked={selectedPredicates.includes(p.name)}
+            onChange={() => dispatch(togglePredicate(p.name))}
           />
           {p.name}
         </label>
