@@ -4,18 +4,24 @@ import BipartiteGraph from "./BipartiteGraph/BipartiteGraph";
 import "./Graph.css";
 import HasseDiagram from "./HasseDiagram/HasseDiagram";
 
-function Graphs() {
+function Graphs({ selectedGraphs }: { selectedGraphs: string[] }) {
   return (
     <div className="graphs-layout">
-      <ReactFlowProvider>
-        <HasseDiagram />
-      </ReactFlowProvider>
-      <ReactFlowProvider>
-        <BasicGraph />
-      </ReactFlowProvider>
-      <ReactFlowProvider>
-        <BipartiteGraph />
-      </ReactFlowProvider>
+      {selectedGraphs.includes("Hasse") && (
+        <ReactFlowProvider>
+          <HasseDiagram />
+        </ReactFlowProvider>
+      )}
+      {selectedGraphs.includes("Basic") && (
+        <ReactFlowProvider>
+          <BasicGraph />
+        </ReactFlowProvider>
+      )}
+      {selectedGraphs.includes("Bipartite") && (
+        <ReactFlowProvider>
+          <BipartiteGraph />
+        </ReactFlowProvider>
+      )}
     </div>
   );
 }

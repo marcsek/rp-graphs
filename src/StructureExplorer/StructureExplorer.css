@@ -135,27 +135,3 @@
 .explorerContainer > svg {
   margin: 0.3rem;
 }
-
-.selectedStructContainer {
-  display: flex;
-  font-size: 1.4rem;
-  gap: 2rem;
-  margin-bottom: 2rem;
-}
-
-.selectedStructContainer .structName {
-  box-sizing: border-box;
-  cursor: pointer;
-  user-select: none;
-  line-height: 0.5;
-}
-
-.selectedStructContainer .structName:hover {
-  font-weight: bold;
-}
-
-.selectedStructContainer .selectedName {
-  font-weight: bold;
-  text-decoration: underline;
-  text-decoration-color: #22c55e;
-}

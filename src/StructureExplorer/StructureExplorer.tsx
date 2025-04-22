@@ -1,26 +1,9 @@
 import { useState } from "react";
 import { useAppSelector } from "../app/hooks";
 import "./StructureExplorer.css";
-import { useDispatch } from "react-redux";
-import { structureChanged } from "./structExplorerSlice";
-import smallStruct from "../structPresets/smallStruct";
-import smallPosetStruct from "../structPresets/smallPosetStruct";
-import mediumPosetStruct from "../structPresets/mediumPosetStruct";
-import bigPosetStruct from "../structPresets/bigPosetStruct";
-
-const structs = ["Small", "Small Poset", "Medium Poset", "Big Poset"] as const;
-const structsPresets = [
-  smallStruct,
-  smallPosetStruct,
-  mediumPosetStruct,
-  bigPosetStruct,
-];
 
 function StructureExplorer() {
   const [expanded, setExpanded] = useState(true);
-  const [selectedStruct, setSelectedStruct] =
-    useState<(typeof structs)[number]>("Small");
-  const dispatch = useDispatch();
   const domain = useAppSelector((state) => state.explorer.domain);
   const constants = useAppSelector((state) => state.explorer.constants);
   const mainPredicate = useAppSelector((state) => state.explorer.mainPredicate);
@@ -43,25 +26,8 @@ function StructureExplorer() {
     .concat(`${mainPredicate.name}/2`)
     .join(", ");
 
-  const handleSelectedStruct = (s: (typeof structs)[number]) => {
-    if (selectedStruct !== s) {
-      dispatch(structureChanged(structsPresets[structs.indexOf(s)]));
-    }
-    setSelectedStruct(s);
-  };
-
   return (
     <div className="topContainer">
-      <div className="selectedStructContainer">
-        {structs.map((s) => (
-          <span
-            className={`structName ${s === selectedStruct ? "selectedName" : ""}`}
-            onClick={() => handleSelectedStruct(s)}
-          >
-            {s}
-          </span>
-        ))}
-      </div>
       <div className="explorerContainer">
         {expanded ? (
           <>

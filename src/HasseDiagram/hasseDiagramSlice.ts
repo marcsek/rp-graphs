@@ -26,40 +26,14 @@ import {
 import { mainPredicateChanged as graphMainPredicateChanged } from "../BasicGraph/basicGraphSlice";
 import { Structure } from "../structPresets/type";
 import { AppThunk } from "../app/store";
+import smallStruct from "../structPresets/smallStruct";
 
 export type NodeType = Node<{ label: string }>;
-
 type EdgeType = Edge<DefaultEdgeOptions>;
-
-let initialNodes: Node<{ label: string }>[] = [];
-
-const subsets = getAllSubsets(["a", "b", "c", "d"]);
-const relation = findRelatedPairs(subsets, isSubset);
-const hEdges = hasseEdges(relation);
-const initialEdges: Edge<DefaultEdgeOptions>[] = [];
-
-subsets.forEach((ch) =>
-  initialNodes.push({
-    id: `{${ch.toString()}}`,
-    position: { x: 0, y: 0 },
-    data: {
-      label: "",
-    },
-    type: "custom",
-  }),
-);
-
-hEdges.forEach(([a, b]) =>
-  initialEdges.push({
-    id: `e${a.toString()}${b.toString()}`,
-    source: `{${a.toString()}}`,
-    target: `{${b.toString()}}`,
-  }),
-);
 
 const convertStructToGraph = (struct: Structure) => {
   if (!isPoset(struct.mainPredicate.interpretation))
-    return { isPoset: false, nodes: null, edges: null };
+    return { isPoset: false, nodes: [], edges: [] };
 
   const domainInUse = [
     ...new Set(struct.mainPredicate.interpretation.flatMap((e) => e)),
@@ -82,10 +56,16 @@ const convertStructToGraph = (struct: Structure) => {
   return { isPoset: true, nodes, edges };
 };
 
+const {
+  nodes: initialNodes,
+  edges: initialEdges,
+  isPoset: initialIsPoset,
+} = convertStructToGraph(smallStruct);
+
 const initialState = {
   nodes: initialNodes,
   edges: initialEdges,
-  isPoset: true,
+  isPoset: initialIsPoset,
 };
 
 const hasseSlice = createSlice({
