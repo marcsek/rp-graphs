@@ -4,11 +4,10 @@ import {
   Position,
   useConnection,
   Node,
-  addEdge,
 } from "@xyflow/react";
 import { memo } from "react";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
-import { edgeAdded, selectSelectedPreds } from "./basicGraphSlice";
+import { edgeAdded, newEdge, selectSelectedPreds } from "./basicGraphSlice";
 
 const CustomNode = memo(({ id }: NodeProps<Node<{ label: string }>>) => {
   const connection = useConnection();
@@ -28,7 +27,7 @@ const CustomNode = memo(({ id }: NodeProps<Node<{ label: string }>>) => {
 
   const createSelfEdge = () => {
     dispatch(
-      edgeAdded({
+      newEdge({
         id: `e${id}-${id}`,
         source: id,
         target: id,

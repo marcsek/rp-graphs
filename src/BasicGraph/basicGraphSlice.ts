@@ -280,6 +280,21 @@ export function updateEdges(edgeChanges: EdgeChange<EdgeType>[]): AppThunk {
   };
 }
 
+export function newEdge(edge: EdgeType): AppThunk {
+  return (dispatch, getState) => {
+    if (!getState().graph.edges.some((e) => e.id === edge.id)) {
+      dispatch(edgeAdded(edge));
+      dispatch(mainPredicateAdded([edge.source, edge.target]));
+      const edges: [string, string][] = getState().graph.edges.map((e) => [
+        e.source,
+        e.target,
+      ]);
+      edges.push([edge.source, edge.target]);
+      dispatch(hasseMainPredicateChanged(edges));
+    }
+  };
+}
+
 export function makeConnection(connection: Connection): AppThunk {
   return (dispatch, getState) => {
     if (

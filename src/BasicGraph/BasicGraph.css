@@ -97,6 +97,8 @@ svg.react-flow__connectionline {
 .buttonList {
   margin: 0;
   padding: 1rem;
+  max-height: 350px;
+  overflow-y: auto;
   gap: 1rem;
   list-style: none;
   display: flex;
