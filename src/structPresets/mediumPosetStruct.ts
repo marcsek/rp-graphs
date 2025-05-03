@@ -5,7 +5,7 @@ const mediumPosetStruct: Structure = {
   constants: {
     "1": ["Alex"],
     "2": ["Bruno"],
-    "5": ["Hugo"],
+    "5": ["Hugo", "dad"],
     "6": ["Tina"],
   },
   mainPredicate: {

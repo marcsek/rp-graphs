@@ -20,7 +20,7 @@
   /* Custom Variables */
   --xy-theme-selected: #f57dbd;
   --xy-theme-hover: #c5c5c5;
-  --xy-theme-edge-hover: black;
+  --xy-theme-edge-hover: #515157;
   --xy-theme-color-focus: #e8e8e8;
 
   /* Built-in Variables see https://reactflow.dev/learn/customization/theming */
@@ -87,7 +87,12 @@
 
 .react-flow__edge.selectable:hover .react-flow__edge-path,
 .react-flow__edge.selectable.selected .react-flow__edge-path {
-  stroke: var(--xy-theme-edge-hover);
+  stroke: var(--xy-theme-edge-hover) !important;
+}
+
+.react-flow__edge.selectable:hover .react-flow__marker *,
+.react-flow__edge.selectable.selected .react-flow__marker * {
+  stroke: var(--xy-theme-edge-hover) !important;
 }
 
 .react-flow__handle {

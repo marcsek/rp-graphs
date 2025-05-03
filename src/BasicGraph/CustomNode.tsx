@@ -4,10 +4,11 @@ import {
   Position,
   useConnection,
   Node,
+  addEdge,
 } from "@xyflow/react";
 import { memo } from "react";
-import { useAppSelector } from "../app/hooks";
-import { selectSelectedPreds } from "./basicGraphSlice";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
+import { edgeAdded, selectSelectedPreds } from "./basicGraphSlice";
 
 const CustomNode = memo(({ id }: NodeProps<Node<{ label: string }>>) => {
   const connection = useConnection();
@@ -16,6 +17,7 @@ const CustomNode = memo(({ id }: NodeProps<Node<{ label: string }>>) => {
   const mySelectedPredicates = useAppSelector((state) =>
     selectSelectedPreds(state, id),
   );
+  const dispatch = useAppDispatch();
 
   const focusedPred = useAppSelector((state) => state.graph.focusedPred);
   const haveFocusedPred = mySelectedPredicates.some(
@@ -24,8 +26,18 @@ const CustomNode = memo(({ id }: NodeProps<Node<{ label: string }>>) => {
 
   const isTarget = connection.inProgress;
 
+  const createSelfEdge = () => {
+    dispatch(
+      edgeAdded({
+        id: `e${id}-${id}`,
+        source: id,
+        target: id,
+      }),
+    );
+  };
+
   return (
-    <div className="customNodeWrapper">
+    <div className="customNodeWrapper" onDoubleClick={createSelfEdge}>
       <div className="predicatesContainer">
         {mySelectedPredicates.map((p) => (
           <div

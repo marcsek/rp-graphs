@@ -109,9 +109,10 @@ const activateEdgesFocus = (state: typeof initialState, focused: string) => {
 
     return {
       ...edge,
-      className: "animated",
+      className: edge.className + " animated",
       style: { ...edge.style, stroke: predSource.color },
       markerEnd: { type: MarkerType.ArrowClosed, color: predSource.color },
+      selectable: false,
     };
   });
 };
@@ -123,6 +124,7 @@ const resetEdgeFocus = (state: typeof initialState) => {
       className: "",
       style: { ...edge.style, stroke: "#b1b1b7" },
       markerEnd: { type: MarkerType.ArrowClosed, color: "#b1b1b7" },
+      selectable: true,
     };
   }));
 };
@@ -136,6 +138,11 @@ const graphSlice = createSlice({
     },
     setEdges(state, action: PayloadAction<EdgeType[]>) {
       state.edges = action.payload;
+    },
+    edgeAdded(state, action: PayloadAction<EdgeType>) {
+      if (!state.edges.some((e) => e.id === action.payload.id)) {
+        state.edges = [...state.edges, action.payload];
+      }
     },
     onNodesChange(state, action: PayloadAction<NodeChange<NodeType>[]>) {
       const a = applyNodeChanges(action.payload, state.nodes);
@@ -225,6 +232,7 @@ const graphSlice = createSlice({
 export const {
   setNodes,
   setEdges,
+  edgeAdded,
   onNodesChange,
   onEdgesChange,
   nodeAdded,

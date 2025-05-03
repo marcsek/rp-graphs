@@ -17,6 +17,7 @@ import "@xyflow/react/dist/style.css";
 import BipartiteNode from "./BipartiteNode";
 import ButtonAddNode from "./ButtonAddNode";
 import { useCallback, useEffect } from "react";
+import CustomControls from "../BasicGraph/CustomConstrols";
 
 const initialNodes: Node[] = [
   {
@@ -38,6 +39,7 @@ const initialNodes: Node[] = [
     type: "bipartiteButton",
     draggable: false,
     deletable: false,
+    focusable: false,
   },
   {
     id: "3",
@@ -58,6 +60,7 @@ const initialNodes: Node[] = [
     type: "bipartiteButton",
     draggable: false,
     deletable: false,
+    focusable: false,
   },
 ];
 
@@ -235,6 +238,7 @@ function BipartiteGraph() {
         fitView
       >
         <Background id="1" />
+        <CustomControls />
       </ReactFlow>
     </div>
   );

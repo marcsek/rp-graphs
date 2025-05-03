@@ -11,14 +11,7 @@ import {
   NodeChange,
 } from "@xyflow/react";
 
-import {
-  findRelatedPairs,
-  getAllSubsets,
-  hasseEdges,
-  hasseToRelation,
-  isPoset,
-  isSubset,
-} from "./PosetHelper";
+import { hasseEdges, hasseToRelation, isPoset } from "./PosetHelper";
 import {
   mainPredicateChanged as structMainPredicateChanged,
   structureChanged,

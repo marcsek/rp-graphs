@@ -12,6 +12,7 @@ import {
   useReactFlow,
   Node,
   NodeChange,
+  Controls,
 } from "@xyflow/react";
 
 import { useCallback } from "react";
@@ -25,14 +26,13 @@ import {
   makeConnection,
   nodeAdded,
   NodeType,
-  onConnect,
-  onEdgesChange,
   onNodesChange,
   setEdges,
   setNodes,
   updateEdges,
 } from "./hasseDiagramSlice";
 import HasseNode from "./HasseNode";
+import CustomControls from "../BasicGraph/CustomConstrols";
 
 const connectionLineStyle = {
   stroke: "#22C55E99",
@@ -142,8 +142,8 @@ function HasseDiagram() {
       {!isPoset && (
         <div className="posetInfo">
           <svg
-            width="36"
-            height="36"
+            width="24"
+            height="24"
             viewBox="0 0 15 15"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -158,7 +158,6 @@ function HasseDiagram() {
           {`Interpretation of '${predicateName}' is not a poset`}
         </div>
       )}
-      <button onClick={() => onLayout()}>layout</button>
       <ReactFlow
         id="4"
         nodes={nodes}
@@ -184,6 +183,7 @@ function HasseDiagram() {
         fitView
       >
         <Background />
+        <CustomControls onLayout={onLayout} />
       </ReactFlow>
       <AddNodeButton
         elements={domain}
