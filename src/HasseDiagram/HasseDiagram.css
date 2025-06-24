@@ -1,16 +1,16 @@
 .posetInfo {
-  width: max-content;
-  font-weight: 500;
-  border-radius: 0.2rem;
-  box-sizing: border-box;
-  padding: 0.8rem 1.2rem;
-  background-color: #f7c631cc;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translateX(-50%) translateY(-50%);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+    width: max-content;
+    font-weight: 500;
+    border-radius: 0.2rem;
+    box-sizing: border-box;
+    padding: 0.8rem 1.2rem;
+    background-color: #f7c631cc;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
 }

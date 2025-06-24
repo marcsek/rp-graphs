@@ -1,53 +1,53 @@
 #root {
-  flex: 1;
-  margin: 0;
-  padding: 2rem;
-  text-align: center;
+    flex: 1;
+    margin: 0;
+    padding: 2rem;
+    text-align: center;
 }
 
 .header {
-  display: flex;
-  font-size: 1.3rem;
-  justify-content: space-between;
+    display: flex;
+    font-size: 1.3rem;
+    justify-content: space-between;
 }
 
 .selectedStructContainer {
-  display: flex;
-  gap: 2rem;
-  flex-grow: 1;
-  align-items: flex-start;
+    display: flex;
+    gap: 2rem;
+    flex-grow: 1;
+    align-items: flex-start;
 }
 
 .selectedStructContainer .structName {
-  box-sizing: border-box;
-  cursor: pointer;
-  user-select: none;
-  line-height: 0.5;
+    box-sizing: border-box;
+    cursor: pointer;
+    user-select: none;
+    line-height: 0.5;
 }
 
 .selectedStructContainer .structName:hover {
-  text-shadow: 1px 0 0 currentColor;
+    text-shadow: 1px 0 0 currentColor;
 }
 
 .selectedStructContainer .selectedName {
-  text-shadow: 1px 0 0 currentColor;
-  text-decoration: underline;
-  text-decoration-color: #22c55e;
+    text-shadow: 1px 0 0 currentColor;
+    text-decoration: underline;
+    text-decoration-color: #22c55e;
 }
 
 .selectedGraphContainer {
-  display: flex;
-  gap: 2rem;
+    display: flex;
+    gap: 2rem;
 }
 
 .selectedGraphContainer .structName {
-  box-sizing: border-box;
-  cursor: pointer;
-  user-select: none;
-  line-height: 0.5;
+    box-sizing: border-box;
+    cursor: pointer;
+    user-select: none;
+    line-height: 0.5;
 }
 
 .selectedGraphContainer .selectedName {
-  text-decoration: underline;
-  text-decoration-color: #ffab00;
+    text-decoration: underline;
+    text-decoration-color: #ffab00;
 }
