@@ -11,6 +11,9 @@ import {
     ReactFlowProvider,
     MarkerType,
     type IsValidConnection,
+    type DefaultEdgeOptions,
+    type EdgeTypes,
+    type NodeTypes,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useCallback, useState } from "react";
@@ -20,6 +23,7 @@ import PredicateNodeComponent, {
 } from "../graphComponents/PredicateNode";
 import DirectEdge from "../graphComponents/DirectEdge";
 import CustomConnectionLine from "../graphComponents/DirectConnectionLine";
+import RandomNodeButton from "../../helpers/RandomNodeButton";
 
 const initialNodes: PredicateNodeType[] = [
     {
@@ -54,15 +58,15 @@ const connectionLineStyle = {
     stroke: "#b1b1b7",
 };
 
-const nodeTypes = {
+const nodeTypes: NodeTypes = {
     predicate: PredicateNodeComponent,
 };
 
-const edgeTypes = {
+const edgeTypes: EdgeTypes = {
     direct: DirectEdge,
 };
 
-const defaultEdgeOptions = {
+const defaultEdgeOptions: DefaultEdgeOptions = {
     type: "direct",
     markerEnd: {
         type: MarkerType.ArrowClosed,
@@ -80,6 +84,17 @@ export default function OrientedGraph() {
         },
         [],
     );
+
+    const addNodeWithId = (id: string) => {
+        const newNode: PredicateNodeType = {
+            id,
+            type: "predicate",
+            position: { x: 0, y: 0 },
+            data: { label: id },
+        };
+
+        setNodes((prev) => [...prev, newNode]);
+    };
 
     const onEdgesChange = useCallback((changes: EdgeChange<Edge>[]) => {
         setEdges((prev) => applyEdgeChanges(changes, prev));
@@ -122,6 +137,7 @@ export default function OrientedGraph() {
                     <DevTools />
                 </ReactFlow>
             </div>
+            <RandomNodeButton getId={addNodeWithId} />
         </ReactFlowProvider>
     );
 }
