@@ -1,11 +1,8 @@
 import "./App.css";
+import OrientedGraph from "./graphs/OrientedGraph/OrientedGraph";
 
 function App() {
-    return (
-        <>
-            <h1>rp-graphs</h1>
-        </>
-    );
+    return <OrientedGraph />;
 }
 
 export default App;
