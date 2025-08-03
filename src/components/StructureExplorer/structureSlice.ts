@@ -4,7 +4,7 @@ import { constantsChanged, predicatesChanged } from "./languageSlice";
 
 export interface StructureState extends Structure {}
 
-const initialState: StructureState = {
+export const initialState: StructureState = {
     domain: ["a", "b", "c"],
 
     iC: { Tim: "a", Anna: "b", Karen: "c" },
@@ -14,6 +14,10 @@ const initialState: StructureState = {
         teaches: [
             ["a", "b"],
             ["a", "c"],
+        ],
+        likes: [
+            ["c", "a"],
+            ["b", "c"],
         ],
     },
 };

@@ -1,13 +1,10 @@
 import {
-    applyEdgeChanges,
-    applyNodeChanges,
     Background,
     ReactFlow,
     type Edge,
     type NodeChange,
     type EdgeChange,
     type OnConnect,
-    addEdge,
     ReactFlowProvider,
     MarkerType,
     type IsValidConnection,
@@ -16,43 +13,19 @@ import {
     type NodeTypes,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import DevTools from "../../helpers/Devtools";
 import PredicateNodeComponent, {
     type PredicateNodeType,
 } from "../graphComponents/PredicateNode";
 import DirectEdge from "../graphComponents/DirectEdge";
 import CustomConnectionLine from "../graphComponents/DirectConnectionLine";
-import RandomNodeButton from "../../helpers/RandomNodeButton";
-
-const initialNodes: PredicateNodeType[] = [
-    {
-        id: "1",
-        type: "predicate",
-        position: { x: 0, y: 0 },
-        data: { label: "1" },
-    },
-    {
-        id: "2",
-        type: "predicate",
-        position: { x: 250, y: 320 },
-        data: { label: "2" },
-    },
-    {
-        id: "3",
-        type: "predicate",
-        position: { x: 40, y: 300 },
-        data: { label: "3" },
-    },
-    {
-        id: "4",
-        type: "predicate",
-        position: { x: 300, y: 0 },
-        data: { label: "4" },
-    },
-];
-
-const initialEdges: Edge[] = [];
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import {
+    onConnected,
+    onEdgesChanged,
+    onNodesChanged,
+} from "./orientedGraphSlice";
 
 const connectionLineStyle = {
     stroke: "#b1b1b7",
@@ -74,34 +47,24 @@ const defaultEdgeOptions: DefaultEdgeOptions = {
     },
 };
 
-export default function OrientedGraph() {
-    const [nodes, setNodes] = useState(initialNodes);
-    const [edges, setEdges] = useState(initialEdges);
+export default function OrientedGraph({ id }: { id: string }) {
+    const dispatch = useAppDispatch();
+    const nodes = useAppSelector((state) => state.orientedGraph[id]?.nodes);
+    const edges = useAppSelector((state) => state.orientedGraph[id]?.edges);
 
     const onNodesChange = useCallback(
         (changes: NodeChange<PredicateNodeType>[]) => {
-            setNodes((prev) => applyNodeChanges(changes, prev));
+            dispatch(onNodesChanged({ id, changes }));
         },
         [],
     );
 
-    const addNodeWithId = (id: string) => {
-        const newNode: PredicateNodeType = {
-            id,
-            type: "predicate",
-            position: { x: 0, y: 0 },
-            data: { label: id },
-        };
-
-        setNodes((prev) => [...prev, newNode]);
-    };
-
     const onEdgesChange = useCallback((changes: EdgeChange<Edge>[]) => {
-        setEdges((prev) => applyEdgeChanges(changes, prev));
+        dispatch(onEdgesChanged({ id, changes }));
     }, []);
 
     const onConnect: OnConnect = useCallback(
-        (params) => setEdges((prev) => addEdge(params, prev)),
+        (connection) => dispatch(onConnected({ id, connection })),
         [],
     );
 
@@ -120,6 +83,7 @@ export default function OrientedGraph() {
         <ReactFlowProvider>
             <div style={{ width: "100%", flexGrow: 1 }}>
                 <ReactFlow
+                    id={id}
                     nodes={nodes}
                     edges={edges}
                     onNodesChange={onNodesChange}
@@ -133,11 +97,10 @@ export default function OrientedGraph() {
                     connectionLineStyle={connectionLineStyle}
                     isValidConnection={isValidConnection}
                 >
-                    <Background />
+                    <Background id={`bg-${id}`} />
                     <DevTools />
                 </ReactFlow>
             </div>
-            <RandomNodeButton getId={addNodeWithId} />
         </ReactFlowProvider>
     );
 }

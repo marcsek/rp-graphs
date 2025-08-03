@@ -1,12 +1,12 @@
 import "./App.css";
+import GraphView from "./components/GraphView/GraphView";
 import StructureExplorer from "./components/StructureExplorer/StructureExplorer";
-import OrientedGraph from "./graphs/OrientedGraph/OrientedGraph";
 
 function App() {
     return (
         <>
             <StructureExplorer />
-            <OrientedGraph />
+            <GraphView />
         </>
     );
 }

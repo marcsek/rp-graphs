@@ -9,7 +9,9 @@ import {
     type NodeProps,
 } from "@xyflow/react";
 
-export type PredicateNodeType = Node<{ label: string }>;
+// Omitting "domAttributes" is needed to prevent issues with immer library.
+// It is never used anyway due to issues with serialization.
+export type PredicateNodeType = Omit<Node<{ label: string }>, "domAttributes">;
 
 export default function PredicateNode({
     id,
