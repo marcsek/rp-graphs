@@ -118,7 +118,7 @@ export default function OrientedGraph() {
 
     return (
         <ReactFlowProvider>
-            <div style={{ width: "100%", height: "100%" }}>
+            <div style={{ width: "100%", flexGrow: 1 }}>
                 <ReactFlow
                     nodes={nodes}
                     edges={edges}
