@@ -1,8 +1,11 @@
 import "./StructureExplorer.css";
 
-import { useAppSelector } from "../../app/hooks";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { domainChanged } from "./structureSlice";
 
 export default function StructureExplorer() {
+    const dispatch = useAppDispatch();
+
     const predicates = useAppSelector((state) =>
         Object.values(state.language.predicates)
             .map((pred) => `${pred.name}\\${pred.arity}`)
@@ -56,6 +59,25 @@ export default function StructureExplorer() {
                         </span>
                     </div>
                 ))}
+            </div>
+            <div>
+                <button
+                    onClick={() =>
+                        dispatch(
+                            domainChanged(
+                                Array.from(
+                                    {
+                                        length:
+                                            Math.floor(Math.random() * 5) + 1,
+                                    },
+                                    (_, i) => String.fromCharCode(97 + i),
+                                ),
+                            ),
+                        )
+                    }
+                >
+                    Random Domain
+                </button>
             </div>
         </section>
     );

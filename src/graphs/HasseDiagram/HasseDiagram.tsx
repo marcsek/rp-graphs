@@ -25,7 +25,8 @@ import {
     onConnected,
     onEdgesChanged,
     onNodesChanged,
-} from "./orientedGraphSlice";
+} from "./hasseDiagramSlice";
+import { staysValidHasseWithEdge, type BinaryRelation } from "./posetHelpers";
 
 const connectionLineStyle = {
     stroke: "#b1b1b7",
@@ -47,10 +48,10 @@ const defaultEdgeOptions: DefaultEdgeOptions = {
     },
 };
 
-export default function OrientedGraph({ id }: { id: string }) {
+export default function HasseDiagram({ id }: { id: string }) {
     const dispatch = useAppDispatch();
-    const nodes = useAppSelector((state) => state.orientedGraph[id]?.nodes);
-    const edges = useAppSelector((state) => state.orientedGraph[id]?.edges);
+    const nodes = useAppSelector((state) => state.hasseDiagram[id]?.nodes);
+    const edges = useAppSelector((state) => state.hasseDiagram[id]?.edges);
 
     const onNodesChange = useCallback(
         (changes: NodeChange<PredicateNodeType>[]) => {
@@ -69,23 +70,27 @@ export default function OrientedGraph({ id }: { id: string }) {
     );
 
     const isValidConnection: IsValidConnection = useCallback(
-        (newEdge) =>
-            // no duplicate edges
-            !edges.some(
-                (edge) =>
-                    newEdge.source === edge.source &&
-                    newEdge.target === edge.target,
-            ),
+        (newEdge) => {
+            const relation: BinaryRelation<string> = edges.map((e) => [
+                e.source,
+                e.target,
+            ]);
+
+            return staysValidHasseWithEdge(relation, [
+                newEdge.source,
+                newEdge.target,
+            ]);
+        },
         [edges],
     );
 
     return (
         <>
-            <p>{`oriented-${id}`}</p>
+            <p>{`hasse-${id}`}</p>
             <ReactFlowProvider>
                 <div style={{ width: "100%", flexGrow: 1 }}>
                     <ReactFlow
-                        id={id}
+                        id={`hasse-${id}`}
                         nodes={nodes}
                         edges={edges}
                         onNodesChange={onNodesChange}
@@ -99,7 +104,7 @@ export default function OrientedGraph({ id }: { id: string }) {
                         connectionLineStyle={connectionLineStyle}
                         isValidConnection={isValidConnection}
                     >
-                        <Background id={`bg-${id}`} />
+                        <Background id={`bg-hasse-${id}`} />
                         <DevTools />
                     </ReactFlow>
                 </div>

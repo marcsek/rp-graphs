@@ -22,25 +22,38 @@ import {
     domainChanged,
     predInterpretationChanged,
 } from "../../components/StructureExplorer/structureSlice";
+import {
+    expandReducedPoset,
+    isPoset,
+    reducePosetRelations,
+    type BinaryRelation,
+} from "./posetHelpers";
 
-export type OrientedGraphState = Record<
+export type HasseDiagramState = Record<
     string,
     {
         nodes: PredicateNodeType[];
         edges: DirectEdgeType[];
+        isPoset: boolean;
     }
 >;
 
-const convertStructToGraph = (struct: Structure, lang: Language) => {
-    const graphs: OrientedGraphState = {};
+const convertStructToHasseDiagram = (struct: Structure, lang: Language) => {
+    const graphs: HasseDiagramState = {};
 
     const binaryPreds = Object.keys(lang.predicates).filter(
         (pred) => lang.predicates[pred].arity === 2,
     );
 
     binaryPreds.forEach((binaryPred) => {
-        const iP = struct.iP[binaryPred];
-        graphs[binaryPred] = { nodes: [], edges: [] };
+        const iP = struct.iP[binaryPred] as BinaryRelation<string>;
+
+        graphs[binaryPred] = { nodes: [], edges: [], isPoset: true };
+
+        if (!isPoset(iP as [string, string][])) {
+            graphs[binaryPred].isPoset = false;
+            return;
+        }
 
         struct.domain.forEach((domElement) => {
             graphs[binaryPred].nodes.push({
@@ -52,7 +65,8 @@ const convertStructToGraph = (struct: Structure, lang: Language) => {
             });
         });
 
-        iP.forEach(([predA, predB]) => {
+        const hasseEdges = reducePosetRelations(iP);
+        hasseEdges.forEach(([predA, predB]) => {
             graphs[binaryPred].edges.push({
                 id: `eg-${predA}->${predB}`,
                 source: predA,
@@ -64,10 +78,10 @@ const convertStructToGraph = (struct: Structure, lang: Language) => {
     return graphs;
 };
 
-const initialState: OrientedGraphState = {};
+const initialState: HasseDiagramState = {};
 
-export const orientedGraphSlice = createSlice({
-    name: "orientedGraph",
+export const hasseDiagramSlice = createSlice({
+    name: "hasseDiagram",
     initialState,
     reducers: {
         setStructure(
@@ -75,7 +89,7 @@ export const orientedGraphSlice = createSlice({
             action: PayloadAction<{ struct: Structure; lang: Language }>,
         ) {
             const { struct, lang } = action.payload;
-            return convertStructToGraph(struct, lang);
+            return convertStructToHasseDiagram(struct, lang);
         },
 
         setNodes(
@@ -140,7 +154,11 @@ export const orientedGraphSlice = createSlice({
         builder.addCase(predInterpretationChanged, (state, action) => {
             const { name, intr: newIP } = action.payload;
 
-            const newEdges = newIP.map(([predA, predB]) => ({
+            const reducedIP = reducePosetRelations(
+                newIP as BinaryRelation<string>,
+            );
+
+            const newEdges = reducedIP.map(([predA, predB]) => ({
                 id: `eg-${predA}->${predB}`,
                 source: predA,
                 target: predB,
@@ -156,6 +174,7 @@ export const selectBinaryPreds = createSelector(
     (preds) => Object.values(preds).filter((pred) => pred.arity === 2),
 );
 
+//TODO: Detect if edge was actually removed
 export const onEdgesChanged = ({
     id,
     changes,
@@ -164,19 +183,21 @@ export const onEdgesChanged = ({
     changes: EdgeChange<DirectEdgeType>[];
 }): AppThunk => {
     return (dispatch, getState) => {
-        const orientedGraphState = getState().orientedGraph;
+        const hasseDiagramState = getState().hasseDiagram;
 
-        const newEdges = applyEdgeChanges(
-            changes,
-            orientedGraphState[id].edges,
-        );
+        const newEdges = applyEdgeChanges(changes, hasseDiagramState[id].edges);
 
-        const structFormat = newEdges.map((edge) => [edge.source, edge.target]);
+        const structFormat: BinaryRelation<string> = newEdges.map((edge) => [
+            edge.source,
+            edge.target,
+        ]);
+
+        const expandedEdges = expandReducedPoset(structFormat);
 
         console.log("Edges Changed");
 
-        //dispatch(setEdges({ id, edges: newEdges }));
-        dispatch(predInterpretationChanged({ name: id, intr: structFormat }));
+        dispatch(setEdges({ id, edges: newEdges }));
+        dispatch(predInterpretationChanged({ name: id, intr: expandedEdges }));
     };
 };
 
@@ -188,20 +209,25 @@ export const onConnected = ({
     connection: Connection;
 }): AppThunk => {
     return (dispatch, getState) => {
-        const orientedGraphState = getState().orientedGraph;
+        const orientedGraphState = getState().hasseDiagram;
 
         const newEdges = addEdge(connection, orientedGraphState[id].edges);
 
-        const structFormat = newEdges.map((edge) => [edge.source, edge.target]);
+        const structFormat: BinaryRelation<string> = newEdges.map((edge) => [
+            edge.source,
+            edge.target,
+        ]);
+
+        const expandedEdges = expandReducedPoset(structFormat);
 
         console.log("On Connected");
 
-        //dispatch(setEdges({ id, edges: newEdges }));
-        dispatch(predInterpretationChanged({ name: id, intr: structFormat }));
+        dispatch(setEdges({ id, edges: newEdges }));
+        dispatch(predInterpretationChanged({ name: id, intr: expandedEdges }));
     };
 };
 
 export const { setStructure, setNodes, setEdges, edgeAdded, onNodesChanged } =
-    orientedGraphSlice.actions;
+    hasseDiagramSlice.actions;
 
-export default orientedGraphSlice.reducer;
+export default hasseDiagramSlice.reducer;
