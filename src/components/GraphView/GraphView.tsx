@@ -11,8 +11,11 @@ import { initialState as initialStateStruct } from "../StructureExplorer/structu
 import { initialState as initialStateLang } from "../StructureExplorer/languageSlice";
 import HasseDiagram from "../../graphs/HasseDiagram/HasseDiagram";
 import { setStructure as setStructureHasse } from "../../graphs/HasseDiagram/hasseDiagramSlice";
+import { setStructure as setStructureBipartite } from "../../graphs/BipartiteGraph/bipartiteGraphSlice.ts";
+import BipartiteGraph from "../../graphs/BipartiteGraph/BipartiteGraph.tsx";
+import { ReactFlowProvider } from "@xyflow/react";
 
-type SelectedGraphs = Record<string, "oriented" | "hasse">;
+type SelectedGraphs = Record<string, "oriented" | "hasse" | "bipartite">;
 
 export default function GraphView() {
     const dispatch = useAppDispatch();
@@ -43,31 +46,56 @@ export default function GraphView() {
                 lang: initialStateLang,
             }),
         );
+
+        dispatch(
+            setStructureBipartite({
+                struct: initialStateStruct,
+                lang: initialStateLang,
+            }),
+        );
     }, []);
 
     const setSelection = (name: string, newType: SelectedGraphs[string]) => {
         setSelectedGraphs((prev) => ({ ...prev, [name]: newType }));
     };
 
+    const graphComponents: Record<
+        SelectedGraphs[string],
+        React.ComponentType<{ id: string }>
+    > = {
+        oriented: OrientedGraph,
+        hasse: HasseDiagram,
+        bipartite: BipartiteGraph,
+    };
+
     return (
         <div className="graphViewContainer">
-            {Object.entries(selectedGraphs).map(([name, graphType]) => (
-                <div className="graphViewItem" key={name}>
-                    <div>
-                        <button onClick={() => setSelection(name, "oriented")}>
-                            Oriented
-                        </button>
-                        <button onClick={() => setSelection(name, "hasse")}>
-                            Hasse
-                        </button>
+            {Object.entries(selectedGraphs).map(([name, graphType]) => {
+                const GraphComponent = graphComponents[graphType];
+
+                return (
+                    <div className="graphViewItem" key={name}>
+                        <div>
+                            <button
+                                onClick={() => setSelection(name, "oriented")}
+                            >
+                                Oriented
+                            </button>
+                            <button onClick={() => setSelection(name, "hasse")}>
+                                Hasse
+                            </button>
+                            <button
+                                onClick={() => setSelection(name, "bipartite")}
+                            >
+                                Bipartite
+                            </button>
+                        </div>
+                        <ReactFlowProvider>
+                            <GraphComponent id={name} />
+                        </ReactFlowProvider>
                     </div>
-                    {graphType === "oriented" ? (
-                        <OrientedGraph id={name} key={name} />
-                    ) : (
-                        <HasseDiagram id={name} key={name} />
-                    )}
-                </div>
-            ))}
+                );
+            })}
         </div>
     );
 }

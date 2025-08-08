@@ -8,6 +8,7 @@ import structureReducer from "../components/StructureExplorer/structureSlice";
 import languageReducer from "../components/StructureExplorer/languageSlice.ts";
 import orientedGraphReducer from "../graphs/OrientedGraph/orientedGraphSlice.ts";
 import hasseDiagramReducer from "../graphs/HasseDiagram/hasseDiagramSlice.ts";
+import bipartiteGraphReducer from "../graphs/BipartiteGraph/bipartiteGraphSlice.ts";
 
 export const store = configureStore({
     reducer: {
@@ -15,6 +16,7 @@ export const store = configureStore({
         language: languageReducer,
         orientedGraph: orientedGraphReducer,
         hasseDiagram: hasseDiagramReducer,
+        bipartiteGraph: bipartiteGraphReducer,
     },
 });
 

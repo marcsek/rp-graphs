@@ -81,3 +81,16 @@ export function getEdgeParams(source: InternalNode, target: InternalNode) {
         targetPos,
     };
 }
+
+export function partition<T>(
+    elements: T[],
+    predicate: (value: T) => boolean,
+): [T[], T[]] {
+    return elements.reduce<[T[], T[]]>(
+        (prev, next) => {
+            prev[predicate(next) ? 0 : 1].push(next);
+            return prev;
+        },
+        [[], []],
+    );
+}

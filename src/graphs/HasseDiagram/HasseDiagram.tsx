@@ -54,15 +54,16 @@ export default function HasseDiagram({ id }: { id: string }) {
     const edges = useAppSelector((state) => state.hasseDiagram[id]?.edges);
 
     const onNodesChange = useCallback(
-        (changes: NodeChange<PredicateNodeType>[]) => {
-            dispatch(onNodesChanged({ id, changes }));
-        },
+        (changes: NodeChange<PredicateNodeType>[]) =>
+            dispatch(onNodesChanged({ id, changes })),
         [],
     );
 
-    const onEdgesChange = useCallback((changes: EdgeChange<Edge>[]) => {
-        dispatch(onEdgesChanged({ id, changes }));
-    }, []);
+    const onEdgesChange = useCallback(
+        (changes: EdgeChange<Edge>[]) =>
+            dispatch(onEdgesChanged({ id, changes })),
+        [],
+    );
 
     const onConnect: OnConnect = useCallback(
         (connection) => dispatch(onConnected({ id, connection })),

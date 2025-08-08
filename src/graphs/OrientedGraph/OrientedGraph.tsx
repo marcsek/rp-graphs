@@ -100,7 +100,7 @@ export default function OrientedGraph({ id }: { id: string }) {
                         connectionLineStyle={connectionLineStyle}
                         isValidConnection={isValidConnection}
                     >
-                        <Background id={`bg-${id}`} />
+                        <Background id={`bg-oriented-${id}`} />
                         {/* <DevTools /> */}
                     </ReactFlow>
                 </div>

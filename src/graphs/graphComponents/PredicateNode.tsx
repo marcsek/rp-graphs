@@ -11,7 +11,8 @@ import {
 
 // Omitting "domAttributes" is needed to prevent issues with immer library.
 // It is never used anyway due to issues with serialization.
-export type PredicateNodeType = Omit<Node<{ label: string }>, "domAttributes">;
+export type PredicateNodeType<NodeData extends Record<string, unknown> = {}> =
+    Omit<Node<{ label: string } & NodeData>, "domAttributes">;
 
 export default function PredicateNode({
     id,
