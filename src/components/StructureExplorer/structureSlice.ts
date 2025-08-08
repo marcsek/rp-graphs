@@ -2,6 +2,7 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { Structure } from "./structure.type";
 import { constantsChanged, predicatesChanged } from "./languageSlice";
 
+// eslint-disable-next-line
 export interface StructureState extends Structure {}
 
 export const initialState: StructureState = {

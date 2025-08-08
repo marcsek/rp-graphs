@@ -53,7 +53,7 @@ export default function GraphView() {
                 lang: initialStateLang,
             }),
         );
-    }, []);
+    }, [dispatch]);
 
     const setSelection = (name: string, newType: SelectedGraphs[string]) => {
         setSelectedGraphs((prev) => ({ ...prev, [name]: newType }));

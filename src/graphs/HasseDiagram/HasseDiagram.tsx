@@ -56,18 +56,18 @@ export default function HasseDiagram({ id }: { id: string }) {
     const onNodesChange = useCallback(
         (changes: NodeChange<PredicateNodeType>[]) =>
             dispatch(onNodesChanged({ id, changes })),
-        [],
+        [id, dispatch],
     );
 
     const onEdgesChange = useCallback(
         (changes: EdgeChange<Edge>[]) =>
             dispatch(onEdgesChanged({ id, changes })),
-        [],
+        [id, dispatch],
     );
 
     const onConnect: OnConnect = useCallback(
         (connection) => dispatch(onConnected({ id, connection })),
-        [],
+        [id, dispatch],
     );
 
     const isValidConnection: IsValidConnection = useCallback(

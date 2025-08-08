@@ -68,7 +68,7 @@ const applyNodeChangesWithLayout = (
     const positionedNodes = ordered.map((node) => {
         const origin = node.data.origin;
         const x = origin === "domain" ? -100 : 100;
-        let y = origin === "domain" ? domainY : rangeY;
+        const y = origin === "domain" ? domainY : rangeY;
 
         const newNode = draggedNodeIds.includes(node.id)
             ? { ...node, position: { x, y: node.position.y } }
@@ -96,18 +96,18 @@ export default function BipartiteGraph({ id }: { id: string }) {
                     nodes: applyNodeChangesWithLayout(changes, nodes),
                 }),
             ),
-        [nodes],
+        [nodes, id, dispatch],
     );
 
     const onEdgesChange = useCallback(
         (changes: EdgeChange<Edge>[]) =>
             dispatch(onEdgesChanged({ id, changes })),
-        [],
+        [id, dispatch],
     );
 
     const onConnect: OnConnect = useCallback(
         (connection) => dispatch(onConnected({ id, connection })),
-        [],
+        [id, dispatch],
     );
 
     return (

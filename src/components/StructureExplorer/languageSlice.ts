@@ -1,6 +1,7 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { Language } from "./structure.type";
 
+// eslint-disable-next-line
 export interface LanguageState extends Language {}
 
 export const initialState: LanguageState = {

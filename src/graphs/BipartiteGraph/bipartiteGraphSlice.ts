@@ -31,6 +31,27 @@ export type BipartiteGraphState = Record<
     }
 >;
 
+const createNode = (
+    id: string,
+    origin: BipartiteNodeType["data"]["origin"],
+): BipartiteNodeType => {
+    return {
+        id: `${origin === "domain" ? "d" : "r"}-${id}`,
+        type: "predicate",
+        position: { x: 0, y: 0 },
+        data: { label: id, origin },
+        //hidden: !iP.flat().includes(domElement),
+    };
+};
+
+const createEdge = (source: string, target: string): DirectEdgeType => {
+    return {
+        id: `eg-${source}->${target}`,
+        source: `d-${source}`,
+        target: `r-${target}`,
+    };
+};
+
 const convertStructToGraph = (struct: Structure, lang: Language) => {
     const graphs: BipartiteGraphState = {};
 
@@ -43,29 +64,12 @@ const convertStructToGraph = (struct: Structure, lang: Language) => {
         graphs[binaryPred] = { nodes: [], edges: [] };
 
         struct.domain.forEach((domElement) => {
-            graphs[binaryPred].nodes.push({
-                id: `d-${domElement}`,
-                type: "predicate",
-                position: { x: 0, y: 0 },
-                data: { label: domElement, origin: "domain" },
-                //hidden: !iP.flat().includes(domElement),
-            });
-
-            graphs[binaryPred].nodes.push({
-                id: `r-${domElement}`,
-                type: "predicate",
-                position: { x: 0, y: 0 },
-                data: { label: domElement, origin: "range" },
-                //hidden: !iP.flat().includes(domElement),
-            });
+            graphs[binaryPred].nodes.push(createNode(domElement, "domain"));
+            graphs[binaryPred].nodes.push(createNode(domElement, "range"));
         });
 
         iP.forEach(([source, target]) => {
-            graphs[binaryPred].edges.push({
-                id: `eg-${source}->${target}`,
-                source: `d-${source}`,
-                target: `r-${target}`,
-            });
+            graphs[binaryPred].edges.push(createEdge(source, target));
         });
     });
 
@@ -125,7 +129,7 @@ export const bipartiteGraphSlice = createSlice({
     extraReducers(builder) {
         builder.addCase(domainChanged, (state, action) => {
             for (const [id, graphState] of Object.entries(state)) {
-                let nodes = [...graphState.nodes];
+                const nodes = [...graphState.nodes];
                 const domain = action.payload;
 
                 const newNodes = domain.flatMap((element) => {
@@ -136,24 +140,8 @@ export const bipartiteGraphSlice = createSlice({
                     return existingNode
                         ? [{ ...existingNode }]
                         : [
-                              {
-                                  id: `d-${element}`,
-                                  type: "predicate",
-                                  position: { x: 0, y: 0 },
-                                  data: {
-                                      label: element,
-                                      origin: "domain" as const,
-                                  },
-                              },
-                              {
-                                  id: `r-${element}`,
-                                  type: "predicate",
-                                  position: { x: 0, y: 0 },
-                                  data: {
-                                      label: element,
-                                      origin: "range" as const,
-                                  },
-                              },
+                              createNode(element, "domain"),
+                              createNode(element, "range"),
                           ];
                 });
 

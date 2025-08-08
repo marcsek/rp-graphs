@@ -24,6 +24,7 @@ type NodeInfoProps = {
     absPosition: XYPosition;
     width?: number;
     height?: number;
+    // eslint-disable-next-line
     data: any;
 };
 
@@ -216,7 +217,7 @@ function ChangeLogger({ limit = 20 }: ChangeLoggerProps) {
         };
 
         store.setState({ onNodesChange: onNodesChangeLogger });
-    }, [onNodesChange, limit]);
+    }, [onNodesChange, limit, store]);
 
     return (
         <div

@@ -38,6 +38,24 @@ export type HasseDiagramState = Record<
     }
 >;
 
+const createNode = (id: string): PredicateNodeType => {
+    return {
+        id: id,
+        type: "predicate",
+        position: { x: 0, y: 0 },
+        data: { label: id },
+        //hidden: !iP.flat().includes(domElement),
+    };
+};
+
+const createEdge = (source: string, target: string): DirectEdgeType => {
+    return {
+        id: `eg-${source}->${target}`,
+        source,
+        target,
+    };
+};
+
 const convertStructToHasseDiagram = (struct: Structure, lang: Language) => {
     const graphs: HasseDiagramState = {};
 
@@ -56,22 +74,12 @@ const convertStructToHasseDiagram = (struct: Structure, lang: Language) => {
         }
 
         struct.domain.forEach((domElement) => {
-            graphs[binaryPred].nodes.push({
-                id: domElement,
-                type: "predicate",
-                position: { x: 0, y: 0 },
-                data: { label: domElement },
-                //hidden: !iP.flat().includes(domElement),
-            });
+            graphs[binaryPred].nodes.push(createNode(domElement));
         });
 
         const hasseEdges = reducePosetRelations(iP);
-        hasseEdges.forEach(([predA, predB]) => {
-            graphs[binaryPred].edges.push({
-                id: `eg-${predA}->${predB}`,
-                source: predA,
-                target: predB,
-            });
+        hasseEdges.forEach(([source, target]) => {
+            graphs[binaryPred].edges.push(createEdge(source, target));
         });
     });
 
@@ -131,7 +139,7 @@ export const hasseDiagramSlice = createSlice({
     extraReducers(builder) {
         builder.addCase(domainChanged, (state, action) => {
             for (const [id, graphState] of Object.entries(state)) {
-                let nodes = [...graphState.nodes];
+                const nodes = [...graphState.nodes];
                 const domain = action.payload;
 
                 const newNodes = domain.map((element) => {
@@ -141,12 +149,7 @@ export const hasseDiagramSlice = createSlice({
 
                     return existingNode
                         ? { ...existingNode }
-                        : {
-                              id: element,
-                              type: "predicate",
-                              position: { x: 0, y: 0 },
-                              data: { label: element },
-                          };
+                        : createNode(element);
                 });
 
                 state[id].nodes = newNodes;

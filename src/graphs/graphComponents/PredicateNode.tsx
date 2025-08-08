@@ -9,10 +9,15 @@ import {
     type NodeProps,
 } from "@xyflow/react";
 
+interface PredicateNodeData extends Record<string, unknown> {
+    label: string;
+}
+
 // Omitting "domAttributes" is needed to prevent issues with immer library.
 // It is never used anyway due to issues with serialization.
-export type PredicateNodeType<NodeData extends Record<string, unknown> = {}> =
-    Omit<Node<{ label: string } & NodeData>, "domAttributes">;
+export type PredicateNodeType<
+    NodeData extends Record<string, unknown> = Record<string, unknown>,
+> = Omit<Node<PredicateNodeData & NodeData>, "domAttributes">;
 
 export default function PredicateNode({
     id,
