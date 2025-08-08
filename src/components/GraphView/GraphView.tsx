@@ -52,7 +52,7 @@ export default function GraphView() {
     return (
         <div className="graphViewContainer">
             {Object.entries(selectedGraphs).map(([name, graphType]) => (
-                <div className="graphViewItem">
+                <div className="graphViewItem" key={name}>
                     <div>
                         <button onClick={() => setSelection(name, "oriented")}>
                             Oriented

@@ -14,7 +14,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useCallback } from "react";
-import DevTools from "../../helpers/Devtools";
+//import DevTools from "../../helpers/Devtools";
 import PredicateNodeComponent, {
     type PredicateNodeType,
 } from "../graphComponents/PredicateNode";
@@ -105,7 +105,7 @@ export default function HasseDiagram({ id }: { id: string }) {
                         isValidConnection={isValidConnection}
                     >
                         <Background id={`bg-hasse-${id}`} />
-                        <DevTools />
+                        {/* <DevTools /> */}
                     </ReactFlow>
                 </div>
             </ReactFlowProvider>

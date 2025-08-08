@@ -14,7 +14,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useCallback } from "react";
-import DevTools from "../../helpers/Devtools";
+//import DevTools from "../../helpers/Devtools";
 import PredicateNodeComponent, {
     type PredicateNodeType,
 } from "../graphComponents/PredicateNode";
@@ -53,15 +53,16 @@ export default function OrientedGraph({ id }: { id: string }) {
     const edges = useAppSelector((state) => state.orientedGraph[id]?.edges);
 
     const onNodesChange = useCallback(
-        (changes: NodeChange<PredicateNodeType>[]) => {
-            dispatch(onNodesChanged({ id, changes }));
-        },
+        (changes: NodeChange<PredicateNodeType>[]) =>
+            dispatch(onNodesChanged({ id, changes })),
         [],
     );
 
-    const onEdgesChange = useCallback((changes: EdgeChange<Edge>[]) => {
-        dispatch(onEdgesChanged({ id, changes }));
-    }, []);
+    const onEdgesChange = useCallback(
+        (changes: EdgeChange<Edge>[]) =>
+            dispatch(onEdgesChanged({ id, changes })),
+        [],
+    );
 
     const onConnect: OnConnect = useCallback(
         (connection) => dispatch(onConnected({ id, connection })),
@@ -100,7 +101,7 @@ export default function OrientedGraph({ id }: { id: string }) {
                         isValidConnection={isValidConnection}
                     >
                         <Background id={`bg-${id}`} />
-                        <DevTools />
+                        {/* <DevTools /> */}
                     </ReactFlow>
                 </div>
             </ReactFlowProvider>

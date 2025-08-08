@@ -42,8 +42,10 @@ export function reducePosetRelations<T>(relation: BinaryRelation<T>) {
     return edges;
 }
 
-export function expandReducedPoset<T>(relation: BinaryRelation<T>) {
-    const elements = new Set(relation.flat());
+export function expandReducedPoset<T>(
+    relation: BinaryRelation<T>,
+    elements: Set<T>,
+) {
     const succMap = buildSuccessorMap(relation);
 
     const expanded: BinaryRelation<T> = [];
@@ -85,17 +87,15 @@ export function staysValidHasseWithEdge<T>(
         return false;
 
     if (preserveEdges) {
-        const newSuccMap = new Map<T, Set<T>>(succMap);
-
-        if (!newSuccMap.has(from)) newSuccMap.set(from, new Set());
-        newSuccMap.get(from)!.add(to);
+        if (!succMap.has(from)) succMap.set(from, new Set());
+        succMap.get(from)!.add(to);
 
         for (const [a, b] of relation) {
-            newSuccMap.get(a)?.delete(b);
+            succMap.get(a)?.delete(b);
 
-            if (isReachable(a, b, newSuccMap)) return false;
+            if (isReachable(a, b, succMap)) return false;
 
-            newSuccMap.get(a)?.add(b);
+            succMap.get(a)?.add(b);
         }
     }
 

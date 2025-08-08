@@ -118,33 +118,40 @@ export const orientedGraphSlice = createSlice({
         builder.addCase(domainChanged, (state, action) => {
             for (const [id, graphState] of Object.entries(state)) {
                 let nodes = [...graphState.nodes];
-
                 const domain = action.payload;
-                const nodeIds = nodes.map((node) => node.id);
 
-                nodes = nodes.filter((node) => domain.includes(node.id));
-                domain.forEach((id) => {
-                    if (!nodeIds.includes(id))
-                        nodes.push({
-                            id: id,
-                            type: "predicate",
-                            position: { x: 0, y: 0 },
-                            data: { label: id },
-                        });
+                const newNodes = domain.map((element) => {
+                    const existingNode = nodes.find(
+                        (node) => node.id === element,
+                    );
+
+                    return existingNode
+                        ? { ...existingNode }
+                        : {
+                              id: element,
+                              type: "predicate",
+                              position: { x: 0, y: 0 },
+                              data: { label: element },
+                          };
                 });
 
-                state[id].nodes = nodes;
+                state[id].nodes = newNodes;
             }
         });
 
         builder.addCase(predInterpretationChanged, (state, action) => {
             const { name, intr: newIP } = action.payload;
 
-            const newEdges = newIP.map(([predA, predB]) => ({
-                id: `eg-${predA}->${predB}`,
-                source: predA,
-                target: predB,
-            }));
+            const newEdges = newIP.map(([source, target]) => {
+                const id = `eg-${source}->${target}`;
+                const existingEdge = state[name].edges.find(
+                    (edge) => edge.id === id,
+                );
+
+                return existingEdge
+                    ? { ...existingEdge }
+                    : { id, source, target };
+            });
 
             state[name].edges = newEdges;
         });
@@ -175,7 +182,7 @@ export const onEdgesChanged = ({
 
         console.log("Edges Changed");
 
-        //dispatch(setEdges({ id, edges: newEdges }));
+        dispatch(setEdges({ id, edges: newEdges }));
         dispatch(predInterpretationChanged({ name: id, intr: structFormat }));
     };
 };
@@ -196,7 +203,6 @@ export const onConnected = ({
 
         console.log("On Connected");
 
-        //dispatch(setEdges({ id, edges: newEdges }));
         dispatch(predInterpretationChanged({ name: id, intr: structFormat }));
     };
 };

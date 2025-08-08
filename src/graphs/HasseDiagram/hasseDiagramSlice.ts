@@ -132,22 +132,24 @@ export const hasseDiagramSlice = createSlice({
         builder.addCase(domainChanged, (state, action) => {
             for (const [id, graphState] of Object.entries(state)) {
                 let nodes = [...graphState.nodes];
-
                 const domain = action.payload;
-                const nodeIds = nodes.map((node) => node.id);
 
-                nodes = nodes.filter((node) => domain.includes(node.id));
-                domain.forEach((id) => {
-                    if (!nodeIds.includes(id))
-                        nodes.push({
-                            id: id,
-                            type: "predicate",
-                            position: { x: 0, y: 0 },
-                            data: { label: id },
-                        });
+                const newNodes = domain.map((element) => {
+                    const existingNode = nodes.find(
+                        (node) => node.id === element,
+                    );
+
+                    return existingNode
+                        ? { ...existingNode }
+                        : {
+                              id: element,
+                              type: "predicate",
+                              position: { x: 0, y: 0 },
+                              data: { label: element },
+                          };
                 });
 
-                state[id].nodes = nodes;
+                state[id].nodes = newNodes;
             }
         });
 
@@ -158,11 +160,16 @@ export const hasseDiagramSlice = createSlice({
                 newIP as BinaryRelation<string>,
             );
 
-            const newEdges = reducedIP.map(([predA, predB]) => ({
-                id: `eg-${predA}->${predB}`,
-                source: predA,
-                target: predB,
-            }));
+            const newEdges = reducedIP.map(([source, target]) => {
+                const id = `eg-${source}->${target}`;
+                const existingEdge = state[name].edges.find(
+                    (edge) => edge.id === id,
+                );
+
+                return existingEdge
+                    ? { ...existingEdge }
+                    : { id, source, target };
+            });
 
             state[name].edges = newEdges;
         });
@@ -174,7 +181,6 @@ export const selectBinaryPreds = createSelector(
     (preds) => Object.values(preds).filter((pred) => pred.arity === 2),
 );
 
-//TODO: Detect if edge was actually removed
 export const onEdgesChanged = ({
     id,
     changes,
@@ -192,7 +198,8 @@ export const onEdgesChanged = ({
             edge.target,
         ]);
 
-        const expandedEdges = expandReducedPoset(structFormat);
+        const domain = new Set(getState().structure.domain);
+        const expandedEdges = expandReducedPoset(structFormat, domain);
 
         console.log("Edges Changed");
 
@@ -218,11 +225,11 @@ export const onConnected = ({
             edge.target,
         ]);
 
-        const expandedEdges = expandReducedPoset(structFormat);
+        const domain = new Set(getState().structure.domain);
+        const expandedEdges = expandReducedPoset(structFormat, domain);
 
         console.log("On Connected");
 
-        dispatch(setEdges({ id, edges: newEdges }));
         dispatch(predInterpretationChanged({ name: id, intr: expandedEdges }));
     };
 };
