@@ -6,17 +6,19 @@ import {
 
 import structureReducer from "../components/StructureExplorer/structureSlice";
 import languageReducer from "../components/StructureExplorer/languageSlice.ts";
-import orientedGraphReducer from "../graphs/OrientedGraph/orientedGraphSlice.ts";
-import hasseDiagramReducer from "../graphs/HasseDiagram/hasseDiagramSlice.ts";
-import bipartiteGraphReducer from "../graphs/BipartiteGraph/bipartiteGraphSlice.ts";
+//import orientedGraphReducer from "../graphs/OrientedGraph/orientedGraphSlice.ts";
+//import hasseDiagramReducer from "../graphs/HasseDiagram/hasseDiagramSlice.ts";
+//import bipartiteGraphReducer from "../graphs/BipartiteGraph/bipartiteGraphSlice.ts";
+import graphManagerReducer from "../graphs/graphSlice.ts";
 
 export const store = configureStore({
     reducer: {
         structure: structureReducer,
         language: languageReducer,
-        orientedGraph: orientedGraphReducer,
-        hasseDiagram: hasseDiagramReducer,
-        bipartiteGraph: bipartiteGraphReducer,
+        //orientedGraph: orientedGraphReducer,
+        //hasseDiagram: hasseDiagramReducer,
+        //bipartiteGraph: bipartiteGraphReducer,
+        graphState: graphManagerReducer,
     },
 });
 

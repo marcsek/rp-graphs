@@ -21,11 +21,7 @@ import PredicateNodeComponent, {
 import DirectEdge from "../graphComponents/DirectEdge";
 import CustomConnectionLine from "../graphComponents/DirectConnectionLine";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import {
-    onConnected,
-    onEdgesChanged,
-    onNodesChanged,
-} from "./hasseDiagramSlice";
+import { onConnected, onEdgesChanged, onNodesChanged } from "../graphSlice.ts";
 import { staysValidHasseWithEdge, type BinaryRelation } from "./posetHelpers";
 
 const connectionLineStyle = {
@@ -49,24 +45,29 @@ const defaultEdgeOptions: DefaultEdgeOptions = {
 };
 
 export default function HasseDiagram({ id }: { id: string }) {
+    const type = "hasse";
+
     const dispatch = useAppDispatch();
-    const nodes = useAppSelector((state) => state.hasseDiagram[id]?.nodes);
-    const edges = useAppSelector((state) => state.hasseDiagram[id]?.edges);
+    const nodes = useAppSelector((state) => state.graphState[id][type]?.nodes);
+    const edges = useAppSelector((state) => state.graphState[id][type]?.edges);
+    const isPoset = useAppSelector(
+        (state) => state.graphState[id][type].isPoset,
+    );
 
     const onNodesChange = useCallback(
         (changes: NodeChange<PredicateNodeType>[]) =>
-            dispatch(onNodesChanged({ id, changes })),
+            dispatch(onNodesChanged({ id, type, changes })),
         [id, dispatch],
     );
 
     const onEdgesChange = useCallback(
         (changes: EdgeChange<Edge>[]) =>
-            dispatch(onEdgesChanged({ id, changes })),
+            dispatch(onEdgesChanged({ id, type, changes })),
         [id, dispatch],
     );
 
     const onConnect: OnConnect = useCallback(
-        (connection) => dispatch(onConnected({ id, connection })),
+        (connection) => dispatch(onConnected({ id, type, connection })),
         [id, dispatch],
     );
 
@@ -88,6 +89,7 @@ export default function HasseDiagram({ id }: { id: string }) {
     return (
         <>
             <p>{`hasse-${id}`}</p>
+            <p>{`Is Poset: ${isPoset}`}</p>
             <ReactFlowProvider>
                 <div style={{ width: "100%", flexGrow: 1 }}>
                     <ReactFlow

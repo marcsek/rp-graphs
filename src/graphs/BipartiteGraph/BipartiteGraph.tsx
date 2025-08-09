@@ -21,7 +21,7 @@ import PredicateNodeComponent, {
 import DirectEdge from "../graphComponents/DirectEdge";
 import CustomConnectionLine from "../graphComponents/DirectConnectionLine";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { onConnected, onEdgesChanged, setNodes } from "./bipartiteGraphSlice";
+import { onConnected, onEdgesChanged, setNodes } from "../graphSlice.ts";
 
 export type BipartiteNodeType = PredicateNodeType<{
     origin: "domain" | "range";
@@ -84,15 +84,18 @@ const applyNodeChangesWithLayout = (
 };
 
 export default function BipartiteGraph({ id }: { id: string }) {
+    const type = "bipartite";
+
     const dispatch = useAppDispatch();
-    const nodes = useAppSelector((state) => state.bipartiteGraph[id]?.nodes);
-    const edges = useAppSelector((state) => state.bipartiteGraph[id]?.edges);
+    const nodes = useAppSelector((state) => state.graphState[id][type]?.nodes);
+    const edges = useAppSelector((state) => state.graphState[id][type]?.edges);
 
     const onNodesChange = useCallback(
         (changes: NodeChange<BipartiteNodeType>[]) =>
             dispatch(
                 setNodes({
                     id,
+                    type,
                     nodes: applyNodeChangesWithLayout(changes, nodes),
                 }),
             ),
@@ -101,12 +104,12 @@ export default function BipartiteGraph({ id }: { id: string }) {
 
     const onEdgesChange = useCallback(
         (changes: EdgeChange<Edge>[]) =>
-            dispatch(onEdgesChanged({ id, changes })),
+            dispatch(onEdgesChanged({ id, type, changes })),
         [id, dispatch],
     );
 
     const onConnect: OnConnect = useCallback(
-        (connection) => dispatch(onConnected({ id, connection })),
+        (connection) => dispatch(onConnected({ id, type, connection })),
         [id, dispatch],
     );
 

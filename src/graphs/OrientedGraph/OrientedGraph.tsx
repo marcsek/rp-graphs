@@ -21,11 +21,7 @@ import PredicateNodeComponent, {
 import DirectEdge from "../graphComponents/DirectEdge";
 import CustomConnectionLine from "../graphComponents/DirectConnectionLine";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import {
-    onConnected,
-    onEdgesChanged,
-    onNodesChanged,
-} from "./orientedGraphSlice";
+import { onConnected, onEdgesChanged, onNodesChanged } from "../graphSlice.ts";
 
 const connectionLineStyle = {
     stroke: "#b1b1b7",
@@ -48,24 +44,26 @@ const defaultEdgeOptions: DefaultEdgeOptions = {
 };
 
 export default function OrientedGraph({ id }: { id: string }) {
+    const type = "oriented";
+
     const dispatch = useAppDispatch();
-    const nodes = useAppSelector((state) => state.orientedGraph[id]?.nodes);
-    const edges = useAppSelector((state) => state.orientedGraph[id]?.edges);
+    const nodes = useAppSelector((state) => state.graphState[id][type]?.nodes);
+    const edges = useAppSelector((state) => state.graphState[id][type]?.edges);
 
     const onNodesChange = useCallback(
         (changes: NodeChange<PredicateNodeType>[]) =>
-            dispatch(onNodesChanged({ id, changes })),
+            dispatch(onNodesChanged({ id, type, changes })),
         [id, dispatch],
     );
 
     const onEdgesChange = useCallback(
         (changes: EdgeChange<Edge>[]) =>
-            dispatch(onEdgesChanged({ id, changes })),
+            dispatch(onEdgesChanged({ id, type, changes })),
         [id, dispatch],
     );
 
     const onConnect: OnConnect = useCallback(
-        (connection) => dispatch(onConnected({ id, connection })),
+        (connection) => dispatch(onConnected({ id, type, connection })),
         [id, dispatch],
     );
 

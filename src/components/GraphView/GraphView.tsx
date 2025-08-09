@@ -3,17 +3,18 @@ import "./GraphView.css";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import OrientedGraph from "../../graphs/OrientedGraph/OrientedGraph";
-import {
-    selectBinaryPreds,
-    setStructure as setStructureOriented,
-} from "../../graphs/OrientedGraph/orientedGraphSlice";
+//import {
+//    selectBinaryPreds,
+//    setStructure as setStructureOriented,
+//} from "../../graphs/OrientedGraph/orientedGraphSlice";
 import { initialState as initialStateStruct } from "../StructureExplorer/structureSlice";
 import { initialState as initialStateLang } from "../StructureExplorer/languageSlice";
 import HasseDiagram from "../../graphs/HasseDiagram/HasseDiagram";
-import { setStructure as setStructureHasse } from "../../graphs/HasseDiagram/hasseDiagramSlice";
-import { setStructure as setStructureBipartite } from "../../graphs/BipartiteGraph/bipartiteGraphSlice.ts";
+//import { setStructure as setStructureHasse } from "../../graphs/HasseDiagram/hasseDiagramSlice";
+//import { setStructure as setStructureBipartite } from "../../graphs/BipartiteGraph/bipartiteGraphSlice.ts";
 import BipartiteGraph from "../../graphs/BipartiteGraph/BipartiteGraph.tsx";
 import { ReactFlowProvider } from "@xyflow/react";
+import { selectBinaryPreds, setStructure } from "../../graphs/graphSlice.ts";
 
 type SelectedGraphs = Record<string, "oriented" | "hasse" | "bipartite">;
 
@@ -34,25 +35,25 @@ export default function GraphView() {
 
     useEffect(() => {
         dispatch(
-            setStructureOriented({
+            setStructure({
                 struct: initialStateStruct,
                 lang: initialStateLang,
             }),
         );
 
-        dispatch(
-            setStructureHasse({
-                struct: initialStateStruct,
-                lang: initialStateLang,
-            }),
-        );
+        //dispatch(
+        //    setStructureHasse({
+        //        struct: initialStateStruct,
+        //        lang: initialStateLang,
+        //    }),
+        //);
 
-        dispatch(
-            setStructureBipartite({
-                struct: initialStateStruct,
-                lang: initialStateLang,
-            }),
-        );
+        //dispatch(
+        //    setStructureBipartite({
+        //        struct: initialStateStruct,
+        //        lang: initialStateLang,
+        //    }),
+        //);
     }, [dispatch]);
 
     const setSelection = (name: string, newType: SelectedGraphs[string]) => {
