@@ -11,7 +11,7 @@ export const initialState: StructureState = {
     iC: { Tim: "a", Anna: "b", Karen: "c" },
     iP: {
         teacher: [["a"]],
-        student: [["b"], ["c"]],
+        student: [["b"], ["c"], ["a"]],
         teaches: [
             ["a", "b"],
             ["a", "a"],

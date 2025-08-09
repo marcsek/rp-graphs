@@ -28,6 +28,7 @@ export const convertPredicateToOrientedGraph = (
     const graph: OrientedGraphState = {
         nodes: [],
         edges: [],
+        selectedPreds: [],
     };
 
     const iP = struct.iP[binaryPred];

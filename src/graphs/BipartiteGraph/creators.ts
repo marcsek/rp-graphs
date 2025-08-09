@@ -33,6 +33,7 @@ export const convertPredicateToBipartiteGraph = (
     const graph: BipartiteGraphState = {
         nodes: [],
         edges: [],
+        selectedPreds: [],
     };
 
     struct.domain.forEach((domElement) => {

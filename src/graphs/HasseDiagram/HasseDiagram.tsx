@@ -5,7 +5,6 @@ import {
     type NodeChange,
     type EdgeChange,
     type OnConnect,
-    ReactFlowProvider,
     MarkerType,
     type IsValidConnection,
     type DefaultEdgeOptions,
@@ -23,6 +22,7 @@ import CustomConnectionLine from "../graphComponents/DirectConnectionLine";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { onConnected, onEdgesChanged, onNodesChanged } from "../graphSlice.ts";
 import { staysValidHasseWithEdge, type BinaryRelation } from "./posetHelpers";
+import PredicateSelector from "../../components/PredicateSelector/PredicateSelector.tsx";
 
 const connectionLineStyle = {
     stroke: "#b1b1b7",
@@ -90,28 +90,27 @@ export default function HasseDiagram({ id }: { id: string }) {
         <>
             <p>{`hasse-${id}`}</p>
             <p>{`Is Poset: ${isPoset}`}</p>
-            <ReactFlowProvider>
-                <div style={{ width: "100%", flexGrow: 1 }}>
-                    <ReactFlow
-                        id={`hasse-${id}`}
-                        nodes={nodes}
-                        edges={edges}
-                        onNodesChange={onNodesChange}
-                        onEdgesChange={onEdgesChange}
-                        onConnect={onConnect}
-                        fitView
-                        nodeTypes={nodeTypes}
-                        edgeTypes={edgeTypes}
-                        defaultEdgeOptions={defaultEdgeOptions}
-                        connectionLineComponent={CustomConnectionLine}
-                        connectionLineStyle={connectionLineStyle}
-                        isValidConnection={isValidConnection}
-                    >
-                        <Background id={`bg-hasse-${id}`} />
-                        {/* <DevTools /> */}
-                    </ReactFlow>
-                </div>
-            </ReactFlowProvider>
+            <div style={{ width: "100%", flexGrow: 1 }}>
+                <ReactFlow
+                    id={`hasse-${id}`}
+                    nodes={nodes}
+                    edges={edges}
+                    onNodesChange={onNodesChange}
+                    onEdgesChange={onEdgesChange}
+                    onConnect={onConnect}
+                    fitView
+                    nodeTypes={nodeTypes}
+                    edgeTypes={edgeTypes}
+                    defaultEdgeOptions={defaultEdgeOptions}
+                    connectionLineComponent={CustomConnectionLine}
+                    connectionLineStyle={connectionLineStyle}
+                    isValidConnection={isValidConnection}
+                >
+                    <Background id={`bg-hasse-${id}`} />
+                    {/* <DevTools /> */}
+                </ReactFlow>
+            </div>
+            <PredicateSelector id={id} type={type} />
         </>
     );
 }

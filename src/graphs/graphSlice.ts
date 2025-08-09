@@ -42,17 +42,20 @@ export type GraphType = (typeof graphTypes)[number];
 export type OrientedGraphState = {
     nodes: PredicateNodeType[];
     edges: DirectEdgeType[];
+    selectedPreds: string[];
 };
 
 export type BipartiteGraphState = {
     nodes: BipartiteNodeType[];
     edges: DirectEdgeType[];
+    selectedPreds: string[];
 };
 
 export type HasseDiagramState = {
     nodes: PredicateNodeType[];
     edges: DirectEdgeType[];
     isPoset: boolean;
+    selectedPreds: string[];
 };
 
 export type GraphStateEntry = {
@@ -144,6 +147,20 @@ export const graphManagerSlice = createSlice({
                 state[id][type].nodes,
             );
         },
+
+        predicateToggled(
+            state,
+            action: PayloadAction<GraphIdentifier & { predicate: string }>,
+        ) {
+            const { id, type, predicate } = action.payload;
+
+            const selected = state[id][type].selectedPreds;
+            if (selected.includes(predicate))
+                state[id][type].selectedPreds = selected.filter(
+                    (pred) => pred != predicate,
+                );
+            else selected.push(predicate);
+        },
     },
 
     extraReducers(builder) {
@@ -215,6 +232,31 @@ export const selectBinaryPreds = createSelector(
     (preds) => Object.values(preds).filter((pred) => pred.arity === 2),
 );
 
+export const selectRelevantConstants = createSelector(
+    [
+        (state: RootState) => state.structure.iC,
+        (_: RootState, predName: string) => predName,
+    ],
+    (iC, predName) => Object.keys(iC).filter((c) => iC[c] === predName),
+);
+
+export const selectUnaryPreds = createSelector(
+    [(state: RootState) => state.language.predicates],
+    (predicates) =>
+        Object.keys(predicates).filter((pred) => predicates[pred].arity === 1),
+);
+
+export const selectRelevantUnaryPreds = createSelector(
+    [
+        (state: RootState) => state.structure.iP,
+        (_: RootState, predName: string) => predName,
+    ],
+    (iP, predName) =>
+        Object.keys(iP).filter((p) =>
+            iP[p].some((t) => t.length === 1 && t[0] === predName),
+        ),
+);
+
 const convertEdgesToStructFormat = (
     graphType: GraphType,
     edges: DirectEdgeType[],
@@ -280,7 +322,13 @@ export const onConnected = ({
     };
 };
 
-export const { setStructure, setNodes, setEdges, edgeAdded, onNodesChanged } =
-    graphManagerSlice.actions;
+export const {
+    setStructure,
+    setNodes,
+    setEdges,
+    edgeAdded,
+    onNodesChanged,
+    predicateToggled,
+} = graphManagerSlice.actions;
 
 export default graphManagerSlice.reducer;

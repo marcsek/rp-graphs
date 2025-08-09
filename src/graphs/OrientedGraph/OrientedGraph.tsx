@@ -5,7 +5,6 @@ import {
     type NodeChange,
     type EdgeChange,
     type OnConnect,
-    ReactFlowProvider,
     MarkerType,
     type IsValidConnection,
     type DefaultEdgeOptions,
@@ -22,6 +21,7 @@ import DirectEdge from "../graphComponents/DirectEdge";
 import CustomConnectionLine from "../graphComponents/DirectConnectionLine";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { onConnected, onEdgesChanged, onNodesChanged } from "../graphSlice.ts";
+import PredicateSelector from "../../components/PredicateSelector/PredicateSelector.tsx";
 
 const connectionLineStyle = {
     stroke: "#b1b1b7",
@@ -81,28 +81,27 @@ export default function OrientedGraph({ id }: { id: string }) {
     return (
         <>
             <p>{`oriented-${id}`}</p>
-            <ReactFlowProvider>
-                <div style={{ width: "100%", flexGrow: 1 }}>
-                    <ReactFlow
-                        id={id}
-                        nodes={nodes}
-                        edges={edges}
-                        onNodesChange={onNodesChange}
-                        onEdgesChange={onEdgesChange}
-                        onConnect={onConnect}
-                        fitView
-                        nodeTypes={nodeTypes}
-                        edgeTypes={edgeTypes}
-                        defaultEdgeOptions={defaultEdgeOptions}
-                        connectionLineComponent={CustomConnectionLine}
-                        connectionLineStyle={connectionLineStyle}
-                        isValidConnection={isValidConnection}
-                    >
-                        <Background id={`bg-oriented-${id}`} />
-                        {/* <DevTools /> */}
-                    </ReactFlow>
-                </div>
-            </ReactFlowProvider>
+            <div style={{ width: "100%", flexGrow: 1 }}>
+                <ReactFlow
+                    id={id}
+                    nodes={nodes}
+                    edges={edges}
+                    onNodesChange={onNodesChange}
+                    onEdgesChange={onEdgesChange}
+                    onConnect={onConnect}
+                    fitView
+                    nodeTypes={nodeTypes}
+                    edgeTypes={edgeTypes}
+                    defaultEdgeOptions={defaultEdgeOptions}
+                    connectionLineComponent={CustomConnectionLine}
+                    connectionLineStyle={connectionLineStyle}
+                    isValidConnection={isValidConnection}
+                >
+                    <Background id={`bg-oriented-${id}`} />
+                    {/* <DevTools /> */}
+                </ReactFlow>
+            </div>
+            <PredicateSelector id={id} type={type} />
         </>
     );
 }

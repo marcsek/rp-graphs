@@ -17,6 +17,7 @@ export const convertPredicateToHasseDiagram = (
         nodes: [],
         edges: [],
         isPoset: true,
+        selectedPreds: [],
     };
 
     if (!isPoset(iP as [string, string][])) {

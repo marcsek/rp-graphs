@@ -15,6 +15,7 @@ import HasseDiagram from "../../graphs/HasseDiagram/HasseDiagram";
 import BipartiteGraph from "../../graphs/BipartiteGraph/BipartiteGraph.tsx";
 import { ReactFlowProvider } from "@xyflow/react";
 import { selectBinaryPreds, setStructure } from "../../graphs/graphSlice.ts";
+import { GraphInfoContext } from "./GraphInfoContext.ts";
 
 type SelectedGraphs = Record<string, "oriented" | "hasse" | "bipartite">;
 
@@ -91,9 +92,13 @@ export default function GraphView() {
                                 Bipartite
                             </button>
                         </div>
-                        <ReactFlowProvider>
-                            <GraphComponent id={name} />
-                        </ReactFlowProvider>
+                        <GraphInfoContext.Provider
+                            value={{ id: name, type: graphType }}
+                        >
+                            <ReactFlowProvider>
+                                <GraphComponent id={name} />
+                            </ReactFlowProvider>
+                        </GraphInfoContext.Provider>
                     </div>
                 );
             })}

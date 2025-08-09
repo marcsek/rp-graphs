@@ -8,6 +8,12 @@ import {
     type Node,
     type NodeProps,
 } from "@xyflow/react";
+import { useAppSelector } from "../../app/hooks";
+import {
+    selectRelevantConstants,
+    selectRelevantUnaryPreds,
+} from "../graphSlice";
+import { useGraphInfo } from "../../components/GraphView/GraphInfoContext";
 
 interface PredicateNodeData extends Record<string, unknown> {
     label: string;
@@ -24,7 +30,25 @@ export default function PredicateNode({
     data,
 }: NodeProps<PredicateNodeType>) {
     const connection = useConnection();
+    const parentInfo = useGraphInfo();
     const isTarget = connection.inProgress && connection.fromNode.id !== id;
+
+    const constants = useAppSelector((state) =>
+        selectRelevantConstants(state, data.label),
+    );
+
+    const unaryPreds = useAppSelector((state) =>
+        selectRelevantUnaryPreds(state, data.label),
+    );
+
+    const selectedPreds = useAppSelector(
+        (state) =>
+            state.graphState[parentInfo.id][parentInfo.type].selectedPreds,
+    );
+
+    const predsToDisplay = unaryPreds.filter((relevant) =>
+        selectedPreds.includes(relevant),
+    );
 
     return (
         <div>
@@ -45,7 +69,11 @@ export default function PredicateNode({
                         isConnectableStart={false}
                     />
                 )}
-                {data.label}
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                    <h2 style={{ margin: 0 }}>{data.label.toUpperCase()}</h2>
+                    <p style={{ margin: 0 }}>{constants.join(", ")}</p>
+                    <p style={{ margin: 0 }}>{predsToDisplay.join(", ")}</p>
+                </div>
             </div>
         </div>
     );
