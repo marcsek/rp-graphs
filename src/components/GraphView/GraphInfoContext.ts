@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import type { GraphType } from "../../graphs/graphSlice";
+import type { GraphType } from "../../graphs/plugins";
 
 export const GraphInfoContext = createContext<{
     id: string;

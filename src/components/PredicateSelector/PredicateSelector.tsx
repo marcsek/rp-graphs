@@ -1,9 +1,6 @@
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import {
-    predicateToggled,
-    selectUnaryPreds,
-    type GraphType,
-} from "../../graphs/graphSlice";
+import { predicateToggled, selectUnaryPreds } from "../../graphs/graphSlice";
+import type { GraphType } from "../../graphs/plugins";
 
 export default function PredicateSelector({
     id,

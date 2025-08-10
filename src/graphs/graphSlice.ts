@@ -18,98 +18,40 @@ import {
     type EdgeChange,
     type NodeChange,
 } from "@xyflow/react";
-import { convertPredicateToHasseDiagram } from "./HasseDiagram/creators.ts";
-import { convertPredicateToOrientedGraph } from "./OrientedGraph/creators.ts";
-import { convertPredicateToBipartiteGraph } from "./BipartiteGraph/creators.ts";
 import {
     domainChanged,
     predInterpretationChanged,
 } from "../components/StructureExplorer/structureSlice";
-import { createNode as createBipartiteNode } from "./BipartiteGraph/creators";
-import { createNode as createOrientedNode } from "./OrientedGraph/creators";
+import { type BinaryRelation } from "./HasseDiagram/posetHelpers";
 import {
-    expandReducedPoset,
-    isPoset,
-    reducePosetRelations,
-    type BinaryRelation,
-} from "./HasseDiagram/posetHelpers";
-import type { BipartiteNodeType } from "./BipartiteGraph/BipartiteGraph";
+    graphTypes,
+    plugins,
+    processEdgesToRelation,
+    processSyncNodes,
+    processSyncPredIntr,
+    type GraphState,
+    type GraphType,
+} from "./plugins.ts";
 
-export const graphTypes = ["oriented", "hasse", "bipartite"] as const;
+export type GraphManagerState = Record<string, GraphState>;
 
-export type GraphType = (typeof graphTypes)[number];
-
-export type OrientedGraphState = {
-    nodes: PredicateNodeType[];
-    edges: DirectEdgeType[];
-    selectedPreds: string[];
-};
-
-export type BipartiteGraphState = {
-    nodes: BipartiteNodeType[];
-    edges: DirectEdgeType[];
-    selectedPreds: string[];
-};
-
-export type HasseDiagramState = {
-    nodes: PredicateNodeType[];
-    edges: DirectEdgeType[];
-    isPoset: boolean;
-    selectedPreds: string[];
-};
-
-export type GraphStateEntry = {
-    oriented: OrientedGraphState;
-    bipartite: BipartiteGraphState;
-    hasse: HasseDiagramState;
-};
-
-export type GraphManagerState = Record<string, GraphStateEntry>;
-
-const initGraphManagerFromStruct = (struct: Structure, lang: Language) => {
-    const managerState: GraphManagerState = {};
-
-    const binaryPreds = Object.keys(lang.predicates).filter(
-        (pred) => lang.predicates[pred].arity === 2,
-    );
-
-    binaryPreds.forEach((binaryPred) => {
-        const graphs: GraphStateEntry = {
-            hasse: convertPredicateToHasseDiagram(struct, binaryPred),
-            oriented: convertPredicateToOrientedGraph(struct, binaryPred),
-            bipartite: convertPredicateToBipartiteGraph(struct, binaryPred),
-        };
-
-        managerState[binaryPred] = graphs;
-    });
-
-    return managerState;
-};
-
-const initialState: GraphManagerState = {};
-
-type GraphIdentifier = { id: string; type: GraphType };
+type WithGraphId<T> = { id: string; type: GraphType } & T;
 
 export const graphManagerSlice = createSlice({
     name: "graphManager",
-    initialState,
+    initialState: {} as GraphManagerState,
     reducers: {
         setStructure(
             _,
             action: PayloadAction<{ struct: Structure; lang: Language }>,
         ) {
             const { struct, lang } = action.payload;
-
             return initGraphManagerFromStruct(struct, lang);
         },
 
         setNodes(
             state,
-            action: PayloadAction<
-                GraphIdentifier & {
-                    nodes: PredicateNodeType[];
-                }
-            >,
+            action: PayloadAction<WithGraphId<{ nodes: PredicateNodeType[] }>>,
         ) {
             const { id, type, nodes } = action.payload;
             state[id][type].nodes = nodes;
@@ -117,9 +59,7 @@ export const graphManagerSlice = createSlice({
 
         setEdges(
             state,
-            action: PayloadAction<
-                GraphIdentifier & { edges: DirectEdgeType[] }
-            >,
+            action: PayloadAction<WithGraphId<{ edges: DirectEdgeType[] }>>,
         ) {
             const { id, type, edges } = action.payload;
             state[id][type].edges = edges;
@@ -127,7 +67,7 @@ export const graphManagerSlice = createSlice({
 
         edgeAdded(
             state,
-            action: PayloadAction<GraphIdentifier & { edge: DirectEdgeType }>,
+            action: PayloadAction<WithGraphId<{ edge: DirectEdgeType }>>,
         ) {
             const { id, type, edge } = action.payload;
             state[id][type].edges = [...state[id][type].edges, edge];
@@ -136,9 +76,7 @@ export const graphManagerSlice = createSlice({
         onNodesChanged(
             state,
             action: PayloadAction<
-                GraphIdentifier & {
-                    changes: NodeChange<PredicateNodeType>[];
-                }
+                WithGraphId<{ changes: NodeChange<PredicateNodeType>[] }>
             >,
         ) {
             const { id, type, changes } = action.payload;
@@ -150,7 +88,7 @@ export const graphManagerSlice = createSlice({
 
         predicateToggled(
             state,
-            action: PayloadAction<GraphIdentifier & { predicate: string }>,
+            action: PayloadAction<WithGraphId<{ predicate: string }>>,
         ) {
             const { id, type, predicate } = action.payload;
 
@@ -165,63 +103,34 @@ export const graphManagerSlice = createSlice({
 
     extraReducers(builder) {
         builder.addCase(domainChanged, (state, action) => {
-            for (const [id, predicate] of Object.entries(state)) {
+            for (const [, graphs] of Object.entries(state)) {
                 for (const graphType of graphTypes) {
-                    const graphState = predicate[graphType];
-
-                    const nodes = [...graphState.nodes];
+                    const graphState = graphs[graphType];
+                    const plugin = plugins[graphType];
                     const domain = action.payload;
 
-                    const newNodes = domain.flatMap((element) => {
-                        const existingNode = nodes.find(
-                            (node) => node.id === element,
-                        );
-
-                        if (existingNode) return { ...existingNode };
-                        else if (graphType === "bipartite") {
-                            return [
-                                createBipartiteNode(element, "domain"),
-                                createBipartiteNode(element, "range"),
-                            ];
-                        } else return createOrientedNode(element);
-                    });
-
-                    state[id][graphType].nodes = newNodes;
+                    (graphs[graphType] as GraphState[typeof graphType]) =
+                        processSyncNodes(plugin, graphState, domain);
                 }
             }
         });
 
         builder.addCase(predInterpretationChanged, (state, action) => {
             const { name, intr } = action.payload;
-            const predicate = state[name];
 
+            if (!(name in state)) return;
+
+            const graphs = state[name];
             for (const graphType of graphTypes) {
-                let newIP = intr as BinaryRelation<string>;
+                const graphState = graphs[graphType];
+                const plugin = plugins[graphType];
 
-                if (graphType === "hasse") {
-                    predicate[graphType].isPoset = isPoset(newIP);
-
-                    if (predicate[graphType].isPoset)
-                        newIP = reducePosetRelations(newIP);
-                }
-
-                const newEdges = newIP.map(([from, to]) => {
-                    const id = `eg-${from}->${to}`;
-                    const existingEdge = predicate[graphType].edges.find(
-                        (edge) => edge.id === id,
+                (graphs[graphType] as GraphState[typeof graphType]) =
+                    processSyncPredIntr(
+                        plugin,
+                        graphState,
+                        intr as BinaryRelation<string>,
                     );
-
-                    const source =
-                        graphType === "bipartite" ? `d-${from}` : from;
-
-                    const target = graphType === "bipartite" ? `r-${to}` : to;
-
-                    return existingEdge
-                        ? { ...existingEdge }
-                        : { id, source, target };
-                });
-
-                predicate[graphType].edges = newEdges;
             }
         });
     },
@@ -237,13 +146,18 @@ export const selectRelevantConstants = createSelector(
         (state: RootState) => state.structure.iC,
         (_: RootState, predName: string) => predName,
     ],
-    (iC, predName) => Object.keys(iC).filter((c) => iC[c] === predName),
+    (iC, predName) => {
+        return Object.keys(iC).filter((c) => iC[c] === predName);
+    },
 );
 
 export const selectUnaryPreds = createSelector(
     [(state: RootState) => state.language.predicates],
-    (predicates) =>
-        Object.keys(predicates).filter((pred) => predicates[pred].arity === 1),
+    (predicates) => {
+        return Object.keys(predicates).filter(
+            (pred) => predicates[pred].arity === 1,
+        );
+    },
 );
 
 export const selectRelevantUnaryPreds = createSelector(
@@ -256,21 +170,6 @@ export const selectRelevantUnaryPreds = createSelector(
             iP[p].some((t) => t.length === 1 && t[0] === predName),
         ),
 );
-
-const convertEdgesToStructFormat = (
-    graphType: GraphType,
-    edges: DirectEdgeType[],
-    domain: Set<string>,
-) => {
-    const structFormat: BinaryRelation<string> = edges.map((edge) => [
-        graphType === "bipartite" ? edge.source.slice(2) : edge.source,
-        graphType === "bipartite" ? edge.target.slice(2) : edge.target,
-    ]);
-
-    return graphType === "hasse"
-        ? expandReducedPoset(structFormat, domain)
-        : structFormat;
-};
 
 export const onEdgesChanged = ({
     id,
@@ -289,8 +188,10 @@ export const onEdgesChanged = ({
             managerState[id][type].edges,
         );
 
-        const domain = new Set(getState().structure.domain);
-        const structFormat = convertEdgesToStructFormat(type, newEdges, domain);
+        const structFormat = processEdgesToRelation(plugins[type], {
+            ...managerState[id][type],
+            edges: newEdges,
+        });
 
         console.log("Edges Changed");
 
@@ -313,13 +214,33 @@ export const onConnected = ({
 
         const newEdges = addEdge(connection, managerState[id][type].edges);
 
-        const domain = new Set(getState().structure.domain);
-        const structFormat = convertEdgesToStructFormat(type, newEdges, domain);
+        const structFormat = processEdgesToRelation(plugins[type], {
+            ...managerState[id][type],
+            edges: newEdges,
+        });
 
         console.log("On Connected");
 
         dispatch(predInterpretationChanged({ name: id, intr: structFormat }));
     };
+};
+
+const initGraphManagerFromStruct = (struct: Structure, lang: Language) => {
+    const managerState: GraphManagerState = {};
+
+    const binaryPreds = Object.keys(lang.predicates).filter(
+        (pred) => lang.predicates[pred].arity === 2,
+    );
+
+    binaryPreds.forEach((binaryPred) => {
+        managerState[binaryPred] = {
+            oriented: plugins.oriented.init(struct, binaryPred),
+            hasse: plugins.hasse.init(struct, binaryPred),
+            bipartite: plugins.bipartite.init(struct, binaryPred),
+        };
+    });
+
+    return managerState;
 };
 
 export const {
