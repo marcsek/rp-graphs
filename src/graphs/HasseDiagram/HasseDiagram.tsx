@@ -23,6 +23,7 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { onConnected, onEdgesChanged, onNodesChanged } from "../graphSlice.ts";
 import { staysValidHasseWithEdge, type BinaryRelation } from "./posetHelpers";
 import PredicateSelector from "../../components/PredicateSelector/PredicateSelector.tsx";
+import NodeSelector from "../../components/NodeSelector/NodeSelector.tsx";
 
 const connectionLineStyle = {
     stroke: "#b1b1b7",
@@ -111,6 +112,7 @@ export default function HasseDiagram({ id }: { id: string }) {
                 </ReactFlow>
             </div>
             <PredicateSelector id={id} type={type} />
+            <NodeSelector id={id} type={type} />
         </>
     );
 }

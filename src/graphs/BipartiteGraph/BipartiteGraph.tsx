@@ -23,6 +23,7 @@ import CustomConnectionLine from "../graphComponents/DirectConnectionLine";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { onConnected, onEdgesChanged, setNodes } from "../graphSlice.ts";
 import PredicateSelector from "../../components/PredicateSelector/PredicateSelector.tsx";
+import NodeSelector from "../../components/NodeSelector/NodeSelector.tsx";
 
 export type BipartiteNodeType = PredicateNodeType<{
     origin: "domain" | "range";
@@ -137,6 +138,7 @@ export default function BipartiteGraph({ id }: { id: string }) {
                 </ReactFlow>
             </div>
             <PredicateSelector id={id} type={type} />
+            <NodeSelector id={id} type={type} />
         </>
     );
 }

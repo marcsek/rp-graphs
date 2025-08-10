@@ -6,15 +6,16 @@ export type OrientedGraphState = {
     nodes: PredicateNodeType[];
     edges: DirectEdgeType[];
     selectedPreds: string[];
+    selectedNodes: string[];
 };
 
-const createNode = (id: string): PredicateNodeType => {
+const createNode = (id: string, hidden = false): PredicateNodeType => {
     return {
         id: id,
         type: "predicate",
         position: { x: 0, y: 0 },
         data: { label: id },
-        //hidden: !iP.flat().includes(domElement),
+        hidden,
     };
 };
 
@@ -32,12 +33,18 @@ export const orientedGraphPlugin: Plugin<"oriented"> = {
             nodes: [],
             edges: [],
             selectedPreds: [],
+            selectedNodes: [...new Set(struct.iP[predicate].flat())],
         };
 
         const iP = struct.iP[predicate];
 
         struct.domain.forEach((domElement) =>
-            graph.nodes.push(createNode(domElement)),
+            graph.nodes.push(
+                createNode(
+                    domElement,
+                    !graph.selectedNodes.includes(domElement),
+                ),
+            ),
         );
 
         iP.forEach(([source, target]) =>
@@ -51,10 +58,28 @@ export const orientedGraphPlugin: Plugin<"oriented"> = {
         const nodeById = new Map(prev.nodes.map((n) => [n.id, n]));
 
         const newNodes = domain.map(
-            (element) => nodeById.get(element) ?? createNode(element),
+            (element) => nodeById.get(element) ?? createNode(element, true),
         );
 
-        return { ...prev, nodes: newNodes };
+        const selectedNodes = newNodes
+            .filter((node) => !node.hidden)
+            .map((node) => node.id);
+
+        return { ...prev, nodes: newNodes, selectedNodes };
+    },
+
+    hideNodes(prev, toggledNode) {
+        let selected = [...prev.selectedNodes];
+        if (selected.includes(toggledNode))
+            selected = selected.filter((pred) => pred != toggledNode);
+        else selected.push(toggledNode);
+
+        const newNodes = prev.nodes.map((node) => ({
+            ...node,
+            hidden: !selected.includes(node.id),
+        }));
+
+        return { ...prev, nodes: newNodes, selectedNodes: selected };
     },
 
     syncPredIntr(prev, intr) {

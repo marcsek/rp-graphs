@@ -22,11 +22,15 @@ import {
     domainChanged,
     predInterpretationChanged,
 } from "../components/StructureExplorer/structureSlice";
-import { type BinaryRelation } from "./HasseDiagram/posetHelpers";
+import {
+    expandReducedPoset,
+    type BinaryRelation,
+} from "./HasseDiagram/posetHelpers";
 import {
     graphTypes,
     plugins,
     processEdgesToRelation,
+    processHideNodes,
     processSyncNodes,
     processSyncPredIntr,
     type GraphState,
@@ -98,6 +102,19 @@ export const graphManagerSlice = createSlice({
                     (pred) => pred != predicate,
                 );
             else selected.push(predicate);
+        },
+
+        nodeToggled(
+            state,
+            action: PayloadAction<WithGraphId<{ node: string }>>,
+        ) {
+            const { id, type, node } = action.payload;
+
+            (state[id][type] as GraphState[typeof type]) = processHideNodes(
+                plugins[type],
+                state[id][type],
+                node,
+            );
         },
     },
 
@@ -225,6 +242,47 @@ export const onConnected = ({
     };
 };
 
+export const selectedNodesChanged = ({
+    id,
+    type,
+    toggledNode,
+}: {
+    id: string;
+    type: GraphType;
+    toggledNode: string;
+}): AppThunk => {
+    return (dispatch, getState) => {
+        dispatch(nodeToggled({ id, type, node: toggledNode }));
+
+        if (type === "hasse" && getState().graphState[id][type].isPoset) {
+            const graphState = getState().graphState[id][type];
+            const vissibleNodes = graphState.nodes
+                .filter((node) => !node.hidden)
+                .map((node) => node.id);
+
+            const vissibleEdges = graphState.edges
+                .filter(
+                    ({ source, target }) =>
+                        vissibleNodes.includes(source) &&
+                        vissibleNodes.includes(target),
+                )
+                .map(({ source, target }) => [
+                    source,
+                    target,
+                ]) as BinaryRelation<string>;
+
+            const newRelation = expandReducedPoset(
+                vissibleEdges,
+                new Set(vissibleNodes),
+            );
+
+            dispatch(
+                predInterpretationChanged({ name: id, intr: newRelation }),
+            );
+        }
+    };
+};
+
 const initGraphManagerFromStruct = (struct: Structure, lang: Language) => {
     const managerState: GraphManagerState = {};
 
@@ -250,6 +308,7 @@ export const {
     edgeAdded,
     onNodesChanged,
     predicateToggled,
+    nodeToggled,
 } = graphManagerSlice.actions;
 
 export default graphManagerSlice.reducer;

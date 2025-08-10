@@ -25,6 +25,7 @@ export type GraphType = (typeof graphTypes)[number];
 export interface Plugin<K extends GraphType> {
     init(struct: Structure, predicate: string): GraphState[K];
     syncNodes(prev: GraphState[K], domain: string[]): GraphState[K];
+    hideNodes(prev: GraphState[K], toggledNode: string): GraphState[K];
     syncPredIntr(
         prev: GraphState[K],
         intr: BinaryRelation<string>,
@@ -46,6 +47,14 @@ export function processSyncNodes<K extends GraphType>(
     domain: string[],
 ): GraphState[K] {
     return plugin.syncNodes(prev, domain);
+}
+
+export function processHideNodes<K extends GraphType>(
+    plugin: Plugin<K>,
+    prev: GraphState[K],
+    toggledNode: string,
+): GraphState[K] {
+    return plugin.hideNodes(prev, toggledNode);
 }
 
 export function processSyncPredIntr<K extends GraphType>(

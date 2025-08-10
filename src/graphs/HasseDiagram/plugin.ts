@@ -11,17 +11,18 @@ import {
 export type HasseDiagramState = {
     nodes: PredicateNodeType[];
     edges: DirectEdgeType[];
-    isPoset: boolean;
     selectedPreds: string[];
+    selectedNodes: string[];
+    isPoset: boolean;
 };
 
-const createNode = (id: string): PredicateNodeType => {
+const createNode = (id: string, hidden = false): PredicateNodeType => {
     return {
         id: id,
         type: "predicate",
         position: { x: 0, y: 0 },
         data: { label: id },
-        //hidden: !iP.flat().includes(domElement),
+        hidden,
     };
 };
 
@@ -42,6 +43,7 @@ export const hasseDiagramPlugin: Plugin<"hasse"> = {
             edges: [],
             isPoset: true,
             selectedPreds: [],
+            selectedNodes: [...new Set(struct.iP[predicate].flat())],
         };
 
         if (!isPoset(iP as [string, string][])) {
@@ -50,7 +52,12 @@ export const hasseDiagramPlugin: Plugin<"hasse"> = {
         }
 
         struct.domain.forEach((domElement) =>
-            graph.nodes.push(createNode(domElement)),
+            graph.nodes.push(
+                createNode(
+                    domElement,
+                    !graph.selectedNodes.includes(domElement),
+                ),
+            ),
         );
 
         const hasseEdges = reducePosetRelations(iP);
@@ -65,10 +72,28 @@ export const hasseDiagramPlugin: Plugin<"hasse"> = {
         const nodeById = new Map(prev.nodes.map((n) => [n.id, n]));
 
         const newNodes = domain.map(
-            (element) => nodeById.get(element) ?? createNode(element),
+            (element) => nodeById.get(element) ?? createNode(element, true),
         );
 
-        return { ...prev, nodes: newNodes };
+        const selectedNodes = newNodes
+            .filter((node) => !node.hidden)
+            .map((node) => node.id);
+
+        return { ...prev, nodes: newNodes, selectedNodes };
+    },
+
+    hideNodes(prev, toggledNode) {
+        let selected = [...prev.selectedNodes];
+        if (selected.includes(toggledNode))
+            selected = selected.filter((pred) => pred != toggledNode);
+        else selected.push(toggledNode);
+
+        const newNodes = prev.nodes.map((node) => ({
+            ...node,
+            hidden: !selected.includes(node.id),
+        }));
+
+        return { ...prev, nodes: newNodes, selectedNodes: selected };
     },
 
     syncPredIntr(prev, intr) {

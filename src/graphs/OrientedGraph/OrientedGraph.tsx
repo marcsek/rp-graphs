@@ -22,6 +22,7 @@ import CustomConnectionLine from "../graphComponents/DirectConnectionLine";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { onConnected, onEdgesChanged, onNodesChanged } from "../graphSlice.ts";
 import PredicateSelector from "../../components/PredicateSelector/PredicateSelector.tsx";
+import NodeSelector from "../../components/NodeSelector/NodeSelector.tsx";
 
 const connectionLineStyle = {
     stroke: "#b1b1b7",
@@ -102,6 +103,7 @@ export default function OrientedGraph({ id }: { id: string }) {
                 </ReactFlow>
             </div>
             <PredicateSelector id={id} type={type} />
+            <NodeSelector id={id} type={type} />
         </>
     );
 }
