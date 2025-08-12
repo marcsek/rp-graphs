@@ -24,7 +24,7 @@ export function isPoset<T>(relation: BinaryRelation<T>) {
     return true;
 }
 
-// Performs transitive reduction of a poset
+// Performs transitive reduction of a given poset
 export function reducePosetRelations<T>(relation: BinaryRelation<T>) {
     const succMap = buildSuccessorMap(relation);
 

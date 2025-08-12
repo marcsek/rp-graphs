@@ -20,7 +20,7 @@ interface PredicateNodeData extends Record<string, unknown> {
 }
 
 // Omitting "domAttributes" is needed to prevent issues with immer library.
-// It is never used anyway due to issues with serialization.
+// It's never used anyway due to issues with serialization.
 export type PredicateNodeType<
     NodeData extends Record<string, unknown> = Record<string, unknown>,
 > = Omit<Node<PredicateNodeData & NodeData>, "domAttributes">;

@@ -24,6 +24,8 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { onConnected, onEdgesChanged, setNodes } from "../graphSlice.ts";
 import PredicateSelector from "../../components/PredicateSelector/PredicateSelector.tsx";
 import NodeSelector from "../../components/NodeSelector/NodeSelector.tsx";
+import { layoutNodes } from "./layout.ts";
+import SelfConnectingEdge from "../graphComponents/SelfConnectingEdge.tsx";
 
 export type BipartiteNodeType = PredicateNodeType<{
     origin: "domain" | "range";
@@ -39,6 +41,7 @@ const nodeTypes: NodeTypes = {
 
 const edgeTypes: EdgeTypes = {
     direct: DirectEdge,
+    selfConnecting: SelfConnectingEdge,
 };
 
 const defaultEdgeOptions: DefaultEdgeOptions = {
@@ -62,27 +65,7 @@ const applyNodeChangesWithLayout = (
         )
         .map((change) => change.id);
 
-    let domainY = 0,
-        rangeY = 0;
-
-    const ordered = newNodes.sort((a, b) => a.position.y - b.position.y);
-
-    const positionedNodes = ordered.map((node) => {
-        const origin = node.data.origin;
-        const x = origin === "domain" ? -100 : 100;
-        const y = origin === "domain" ? domainY : rangeY;
-
-        const newNode = draggedNodeIds.includes(node.id)
-            ? { ...node, position: { x, y: node.position.y } }
-            : { ...node, position: { x, y } };
-
-        domainY += origin === "domain" ? 200 : 0;
-        rangeY += origin === "range" ? 200 : 0;
-
-        return newNode;
-    });
-
-    return positionedNodes;
+    return layoutNodes(newNodes, draggedNodeIds);
 };
 
 export default function BipartiteGraph({ id }: { id: string }) {

@@ -1,6 +1,7 @@
 import type { DirectEdgeType } from "../graphComponents/DirectEdge";
 import type { Plugin } from "../plugins";
 import type { BipartiteNodeType } from "./BipartiteGraph";
+import { layoutNodes } from "./layout";
 
 export type BipartiteGraphState = {
     nodes: BipartiteNodeType[];
@@ -48,6 +49,8 @@ export const bipartiteGraphPlugin: Plugin<"bipartite"> = {
             graph.nodes.push(createNode(domElement, "range", hidden));
         });
 
+        graph.nodes = layoutNodes(graph.nodes);
+
         iP.forEach(([source, target]) => {
             graph.edges.push(createEdge(source, target));
         });
@@ -67,7 +70,7 @@ export const bipartiteGraphPlugin: Plugin<"bipartite"> = {
             .filter((node) => !node.hidden)
             .map((node) => node.id.slice("d-".length));
 
-        return { ...prev, nodes: newNodes, selectedNodes };
+        return { ...prev, nodes: layoutNodes(newNodes), selectedNodes };
     },
 
     hideNodes(prev, toggledNode) {
@@ -81,7 +84,21 @@ export const bipartiteGraphPlugin: Plugin<"bipartite"> = {
             hidden: !selected.includes(node.id.slice("d-".length)),
         }));
 
-        return { ...prev, nodes: newNodes, selectedNodes: selected };
+        // React Flow doesn't correctly handle hiding edges connecting hidden nodes,
+        // so it's done manually in this case. Otherwise it's not needed.
+        const newEdges = prev.edges.map((edge) => ({
+            ...edge,
+            hidden:
+                !selected.includes(edge.source.slice("d-".length)) ||
+                !selected.includes(edge.target.slice("d-".length)),
+        }));
+
+        return {
+            ...prev,
+            nodes: layoutNodes(newNodes),
+            edges: newEdges,
+            selectedNodes: selected,
+        };
     },
 
     syncPredIntr(prev, intr) {

@@ -24,6 +24,7 @@ import { onConnected, onEdgesChanged, onNodesChanged } from "../graphSlice.ts";
 import { staysValidHasseWithEdge, type BinaryRelation } from "./posetHelpers";
 import PredicateSelector from "../../components/PredicateSelector/PredicateSelector.tsx";
 import NodeSelector from "../../components/NodeSelector/NodeSelector.tsx";
+import SelfConnectingEdge from "../graphComponents/SelfConnectingEdge.tsx";
 
 const connectionLineStyle = {
     stroke: "#b1b1b7",
@@ -35,6 +36,7 @@ const nodeTypes: NodeTypes = {
 
 const edgeTypes: EdgeTypes = {
     direct: DirectEdge,
+    selfConnecting: SelfConnectingEdge,
 };
 
 const defaultEdgeOptions: DefaultEdgeOptions = {

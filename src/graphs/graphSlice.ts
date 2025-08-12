@@ -163,18 +163,13 @@ export const selectRelevantConstants = createSelector(
         (state: RootState) => state.structure.iC,
         (_: RootState, predName: string) => predName,
     ],
-    (iC, predName) => {
-        return Object.keys(iC).filter((c) => iC[c] === predName);
-    },
+    (iC, predName) => Object.keys(iC).filter((c) => iC[c] === predName),
 );
 
 export const selectUnaryPreds = createSelector(
     [(state: RootState) => state.language.predicates],
-    (predicates) => {
-        return Object.keys(predicates).filter(
-            (pred) => predicates[pred].arity === 1,
-        );
-    },
+    (predicates) =>
+        Object.keys(predicates).filter((pred) => predicates[pred].arity === 1),
 );
 
 export const selectRelevantUnaryPreds = createSelector(

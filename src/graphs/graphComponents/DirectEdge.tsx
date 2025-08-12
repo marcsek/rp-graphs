@@ -6,21 +6,18 @@ import {
     type EdgeProps,
 } from "@xyflow/react";
 import { getEdgeParams } from "../../helpers/utils";
+import SelfConnectingEdge from "./SelfConnectingEdge";
 
 export type DirectEdgeType = Edge;
 
-export default function DirectEdge({
-    id,
-    source: sourceId,
-    target: targetId,
-    markerEnd,
-    style,
-}: EdgeProps<DirectEdgeType>) {
-    const source = useInternalNode(sourceId);
-    const target = useInternalNode(targetId);
+export default function DirectEdge(props: EdgeProps<DirectEdgeType>) {
+    const source = useInternalNode(props.source);
+    const target = useInternalNode(props.target);
 
     if (!source || !target) return null;
+    if (props.source === props.target) return <SelfConnectingEdge {...props} />;
 
+    const { id, markerEnd, style } = props;
     const { sx, sy, tx, ty } = getEdgeParams(source, target);
 
     const [path] = getStraightPath({
