@@ -15,22 +15,27 @@ export default function NodeSelector({
         (state) => state.graphState[id][type].selectedNodes,
     );
 
-    return domain.map((element) => (
-        <label key={element}>
-            <input
-                type="checkbox"
-                checked={selectedNodes.includes(element)}
-                onChange={() =>
-                    dispatch(
-                        selectedNodesChanged({
-                            id,
-                            type,
-                            toggledNode: element,
-                        }),
-                    )
-                }
-            />
-            {element}
-        </label>
-    ));
+    return (
+        <div style={{ display: "flex", flexDirection: "column" }}>
+            <h4 style={{ whiteSpace: "nowrap" }}>Domain Elements</h4>
+            {domain.map((element) => (
+                <label key={element}>
+                    <input
+                        type="checkbox"
+                        checked={selectedNodes.includes(element)}
+                        onChange={() =>
+                            dispatch(
+                                selectedNodesChanged({
+                                    id,
+                                    type,
+                                    toggledNode: element,
+                                }),
+                            )
+                        }
+                    />
+                    {element}
+                </label>
+            ))}
+        </div>
+    );
 }

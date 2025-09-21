@@ -15,20 +15,27 @@ export default function PredicateSelector({
         (state) => state.graphState[id][type].selectedPreds,
     );
 
-    return unaryPreds.map((pred) => (
-        <label
-            key={pred}
-            //onMouseEnter={() => dispatch(predFocused(p.name))}
-            //onMouseLeave={() => dispatch(predUnfocused())}
-        >
-            <input
-                type="checkbox"
-                checked={selectedPreds.includes(pred)}
-                onChange={() =>
-                    dispatch(predicateToggled({ id, type, predicate: pred }))
-                }
-            />
-            {pred}
-        </label>
-    ));
+    return (
+        <div style={{ display: "flex", flexDirection: "column" }}>
+            <h4 style={{ whiteSpace: "nowrap" }}>Unary Predicates</h4>
+            {unaryPreds.map((pred) => (
+                <label
+                    key={pred}
+                    //onMouseEnter={() => dispatch(predFocused(p.name))}
+                    //onMouseLeave={() => dispatch(predUnfocused())}
+                >
+                    <input
+                        type="checkbox"
+                        checked={selectedPreds.includes(pred)}
+                        onChange={() =>
+                            dispatch(
+                                predicateToggled({ id, type, predicate: pred }),
+                            )
+                        }
+                    />
+                    {pred}
+                </label>
+            ))}
+        </div>
+    );
 }

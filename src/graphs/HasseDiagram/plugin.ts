@@ -35,15 +35,15 @@ const createEdge = (source: string, target: string): DirectEdgeType => {
 };
 
 export const hasseDiagramPlugin: Plugin<"hasse"> = {
-    init(struct, predicate) {
-        const iP = struct.iP[predicate] as BinaryRelation<string>;
+    init(domain, predicate) {
+        const iP = predicate.intr;
 
         const graph: HasseDiagramState = {
             nodes: [],
             edges: [],
             isPoset: true,
             selectedPreds: [],
-            selectedNodes: [...new Set(struct.iP[predicate].flat())],
+            selectedNodes: [...new Set(iP.flat())],
         };
 
         if (!isPoset(iP as [string, string][])) {
@@ -51,7 +51,7 @@ export const hasseDiagramPlugin: Plugin<"hasse"> = {
             return graph;
         }
 
-        struct.domain.forEach((domElement) =>
+        domain.forEach((domElement) =>
             graph.nodes.push(
                 createNode(
                     domElement,
@@ -110,7 +110,19 @@ export const hasseDiagramPlugin: Plugin<"hasse"> = {
                 edgeById.get(`eg-${from}->${to}`) ?? createEdge(from, to),
         );
 
-        return { ...prev, edges: newEdges, isPoset: poset };
+        const selectedNodes = [...new Set(intr.flat())];
+        const newNodes = prev.nodes.map((node) => ({
+            ...node,
+            hidden: !selectedNodes.includes(node.id),
+        }));
+
+        return {
+            ...prev,
+            nodes: newNodes,
+            selectedNodes,
+            edges: newEdges,
+            isPoset: poset,
+        };
     },
 
     edgesToRelation(state) {

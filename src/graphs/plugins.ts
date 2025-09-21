@@ -1,4 +1,3 @@
-import type { Structure } from "../components/StructureExplorer/structure.type";
 import {
     bipartiteGraphPlugin,
     type BipartiteGraphState,
@@ -23,7 +22,10 @@ export const graphTypes = ["oriented", "hasse", "bipartite"] as const;
 export type GraphType = (typeof graphTypes)[number];
 
 export interface Plugin<K extends GraphType> {
-    init(struct: Structure, predicate: string): GraphState[K];
+    init(
+        domain: string[],
+        predicate: { name: string; intr: BinaryRelation<string> },
+    ): GraphState[K];
     syncNodes(prev: GraphState[K], domain: string[]): GraphState[K];
     hideNodes(prev: GraphState[K], toggledNode: string): GraphState[K];
     syncPredIntr(

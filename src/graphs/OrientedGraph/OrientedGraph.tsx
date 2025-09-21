@@ -21,8 +21,6 @@ import DirectEdge from "../graphComponents/DirectEdge";
 import CustomConnectionLine from "../graphComponents/DirectConnectionLine";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { onConnected, onEdgesChanged, onNodesChanged } from "../graphSlice.ts";
-import PredicateSelector from "../../components/PredicateSelector/PredicateSelector.tsx";
-import NodeSelector from "../../components/NodeSelector/NodeSelector.tsx";
 import SelfConnectingEdge from "../graphComponents/SelfConnectingEdge.tsx";
 
 const connectionLineStyle = {
@@ -83,7 +81,6 @@ export default function OrientedGraph({ id }: { id: string }) {
 
     return (
         <>
-            <p>{`oriented-${id}`}</p>
             <div style={{ width: "100%", flexGrow: 1 }}>
                 <ReactFlow
                     id={id}
@@ -104,8 +101,6 @@ export default function OrientedGraph({ id }: { id: string }) {
                     {/* <DevTools /> */}
                 </ReactFlow>
             </div>
-            <PredicateSelector id={id} type={type} />
-            <NodeSelector id={id} type={type} />
         </>
     );
 }

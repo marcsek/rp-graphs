@@ -13,6 +13,11 @@
     font-weight: bold;
 }
 
+.predicateNodeBody h2 {
+    font-size: 2rem;
+    font-weight: 600;
+}
+
 div.predicateNodeHandle {
     width: 100%;
     height: 100%;

@@ -286,10 +286,15 @@ const initGraphManagerFromStruct = (struct: Structure, lang: Language) => {
     );
 
     binaryPreds.forEach((binaryPred) => {
+        const predicate = {
+            name: binaryPred,
+            intr: struct.iP[binaryPred] as BinaryRelation<string>,
+        };
+
         managerState[binaryPred] = {
-            oriented: plugins.oriented.init(struct, binaryPred),
-            hasse: plugins.hasse.init(struct, binaryPred),
-            bipartite: plugins.bipartite.init(struct, binaryPred),
+            oriented: plugins.oriented.init(struct.domain, predicate),
+            hasse: plugins.hasse.init(struct.domain, predicate),
+            bipartite: plugins.bipartite.init(struct.domain, predicate),
         };
     });
 

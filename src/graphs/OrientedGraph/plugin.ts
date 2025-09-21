@@ -28,17 +28,17 @@ const createEdge = (source: string, target: string): DirectEdgeType => {
 };
 
 export const orientedGraphPlugin: Plugin<"oriented"> = {
-    init(struct, predicate) {
+    init(domain, predicate) {
+        const iP = predicate.intr;
+
         const graph: OrientedGraphState = {
             nodes: [],
             edges: [],
             selectedPreds: [],
-            selectedNodes: [...new Set(struct.iP[predicate].flat())],
+            selectedNodes: [...new Set(iP.flat())],
         };
 
-        const iP = struct.iP[predicate];
-
-        struct.domain.forEach((domElement) =>
+        domain.forEach((domElement) =>
             graph.nodes.push(
                 createNode(
                     domElement,

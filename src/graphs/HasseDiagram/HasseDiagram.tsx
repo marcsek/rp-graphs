@@ -22,8 +22,6 @@ import CustomConnectionLine from "../graphComponents/DirectConnectionLine";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { onConnected, onEdgesChanged, onNodesChanged } from "../graphSlice.ts";
 import { staysValidHasseWithEdge, type BinaryRelation } from "./posetHelpers";
-import PredicateSelector from "../../components/PredicateSelector/PredicateSelector.tsx";
-import NodeSelector from "../../components/NodeSelector/NodeSelector.tsx";
 import SelfConnectingEdge from "../graphComponents/SelfConnectingEdge.tsx";
 
 const connectionLineStyle = {
@@ -91,7 +89,6 @@ export default function HasseDiagram({ id }: { id: string }) {
 
     return (
         <>
-            <p>{`hasse-${id}`}</p>
             <p>{`Is Poset: ${isPoset}`}</p>
             <div style={{ width: "100%", flexGrow: 1 }}>
                 <ReactFlow
@@ -113,8 +110,6 @@ export default function HasseDiagram({ id }: { id: string }) {
                     {/* <DevTools /> */}
                 </ReactFlow>
             </div>
-            <PredicateSelector id={id} type={type} />
-            <NodeSelector id={id} type={type} />
         </>
     );
 }

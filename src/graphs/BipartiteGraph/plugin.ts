@@ -33,17 +33,17 @@ const createEdge = (source: string, target: string): DirectEdgeType => {
 };
 
 export const bipartiteGraphPlugin: Plugin<"bipartite"> = {
-    init(struct, predicate) {
-        const iP = struct.iP[predicate];
+    init(domain, predicate) {
+        const iP = predicate.intr;
 
         const graph: BipartiteGraphState = {
             nodes: [],
             edges: [],
             selectedPreds: [],
-            selectedNodes: [...new Set(struct.iP[predicate].flat())],
+            selectedNodes: [...new Set(iP.flat())],
         };
 
-        struct.domain.forEach((domElement) => {
+        domain.forEach((domElement) => {
             const hidden = !graph.selectedNodes.includes(domElement);
             graph.nodes.push(createNode(domElement, "domain", hidden));
             graph.nodes.push(createNode(domElement, "range", hidden));
@@ -79,10 +79,16 @@ export const bipartiteGraphPlugin: Plugin<"bipartite"> = {
             selected = selected.filter((pred) => pred != toggledNode);
         else selected.push(toggledNode);
 
-        const newNodes = prev.nodes.map((node) => ({
-            ...node,
-            hidden: !selected.includes(node.id.slice("d-".length)),
-        }));
+        const newNodes = prev.nodes.map((node) => {
+            const hidden = !selected.includes(node.id.slice("d-".length));
+            const defaultPos = { x: Infinity, y: Infinity };
+
+            return {
+                ...node,
+                hidden,
+                position: hidden ? defaultPos : node.position,
+            };
+        });
 
         // React Flow doesn't correctly handle hiding edges connecting hidden nodes,
         // so it's done manually in this case. Otherwise it's not needed.

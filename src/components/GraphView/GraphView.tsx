@@ -16,6 +16,7 @@ import BipartiteGraph from "../../graphs/BipartiteGraph/BipartiteGraph.tsx";
 import { ReactFlowProvider } from "@xyflow/react";
 import { selectBinaryPreds, setStructure } from "../../graphs/graphSlice.ts";
 import { GraphInfoContext } from "./GraphInfoContext.ts";
+import GraphHUD from "../GraphHUD/GraphHUD.tsx";
 
 type SelectedGraphs = Record<string, "oriented" | "hasse" | "bipartite">;
 
@@ -77,21 +78,11 @@ export default function GraphView() {
 
                 return (
                     <div className="graphViewItem" key={name}>
-                        <div>
-                            <button
-                                onClick={() => setSelection(name, "oriented")}
-                            >
-                                Oriented
-                            </button>
-                            <button onClick={() => setSelection(name, "hasse")}>
-                                Hasse
-                            </button>
-                            <button
-                                onClick={() => setSelection(name, "bipartite")}
-                            >
-                                Bipartite
-                            </button>
-                        </div>
+                        <GraphHUD
+                            id={name}
+                            type={graphType}
+                            typeSelected={(type) => setSelection(name, type)}
+                        />
                         <GraphInfoContext.Provider
                             value={{ id: name, type: graphType }}
                         >
